@@ -1,8 +1,6 @@
-/* eslint-disable @next/next/no-title-in-document-head */
 import { Head, Html, Main, NextScript } from 'next/document';
 
-// TODO: Remove title in this file and add it to each page
-export default function Document() {
+export default function Document(): JSX.Element {
   return (
     <Html>
       <Head>

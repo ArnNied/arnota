@@ -1,7 +1,8 @@
-export default function Index() {
-  return (
-    <div className='bg-red-500'>
-      <h1>Index</h1>
-    </div>
-  );
-}
+import MainPage from '@/components/index/main/Main';
+import type { NextPage } from 'next';
+
+const IndexPage: NextPage = () => {
+  return <MainPage />;
+};
+
+export default IndexPage;

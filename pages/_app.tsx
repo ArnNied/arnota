@@ -1,13 +1,14 @@
 import '@/styles/globals.css';
 
-import type { AppProps } from 'next/app';
 import Head from 'next/head';
+import type { AppProps } from 'next/app';
 
 // import { Provider } from 'react-redux';
 
 // import { store } from '@/store/store';
 
-export default function MyApp({ Component, pageProps }: AppProps) {
+// TODO: Remove title in this file and add it to each page
+export default function MyApp({ Component, pageProps }: AppProps): JSX.Element {
   return (
     <>
       <Head>
