@@ -12,8 +12,7 @@ module.exports = {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['Poppins', ...defaultTheme.fontFamily.sans],
-        nunito: ['Nunito', ...defaultTheme.fontFamily.sans]
+        poppins: ['Poppins', ...defaultTheme.fontFamily.sans]
       },
       colors: {
         light: '#F3F1EE',

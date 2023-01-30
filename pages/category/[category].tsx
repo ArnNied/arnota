@@ -1,15 +1,23 @@
+import { useRouter } from 'next/router';
 import { useEffect } from 'react';
-
-import NoteList from '@/components/note/NoteList';
-import Navbar from '@/components/shared/Navbar';
-import Topbar from '@/components/shared/Topbar';
 
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { setNotesIfReduxStateIsEmpty } from '@/core/utils';
 
-export default function MainPage(): JSX.Element {
+import Navbar from '@/components/shared/Navbar';
+import Topbar from '@/components/shared/Topbar';
+import NoteList from '@/components/note/NoteList';
+
+import type { NextPage } from 'next';
+
+const CategoryPage: NextPage = () => {
+  const router = useRouter();
   const dispatch = useAppDispatch();
-  const notesSelector = useAppSelector((state) => state.notes);
+  const { category } = router.query;
+
+  const notesSelector = useAppSelector((state) =>
+    state.notes.filter((note) => note.category === category)
+  );
 
   useEffect(() => {
     if (notesSelector.length !== 0) return;
@@ -18,6 +26,7 @@ export default function MainPage(): JSX.Element {
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
   return (
     <>
       <Navbar />
@@ -36,4 +45,6 @@ export default function MainPage(): JSX.Element {
       </div>
     </>
   );
-}
+};
+
+export default CategoryPage;

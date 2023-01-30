@@ -9,16 +9,6 @@ export default function Document(): JSX.Element {
           name='description'
           content='Capture your ideas and collaborate with others with Arnota - the powerful note-taking application that makes sharing notes simple and efficient.'
         />
-        <link rel='preconnect' href='https://fonts.googleapis.com' />
-        <link
-          rel='preconnect'
-          href='https://fonts.gstatic.com'
-          crossOrigin='anonymous'
-        />
-        <link
-          href='https://fonts.googleapis.com/css2?family=Nunito&family=Poppins&display=swap'
-          rel='stylesheet'
-        ></link>
         <link rel='icon' href='/favicon.ico' />
       </Head>
       <body className='bg-light'>
