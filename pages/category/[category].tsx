@@ -5,7 +5,6 @@ import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { setNotesIfReduxStateIsEmpty } from '@/core/utils';
 
 import Navbar from '@/components/shared/Navbar';
-import Topbar from '@/components/shared/Topbar';
 import NoteList from '@/components/note/NoteList';
 
 import type { NextPage } from 'next';
@@ -31,9 +30,8 @@ const CategoryPage: NextPage = () => {
     <>
       <Navbar />
       <div className='w-4/5 flex flex-col ml-auto pb-12 bg-light'>
-        <Topbar />
-        <div className='h-full px-4 py-4 mt-12'>
-          <div>
+        <div className='h-full px-4 py-4'>
+          <div className='pb-4 border-b border-secondary'>
             <input
               type='text'
               placeholder='Search'

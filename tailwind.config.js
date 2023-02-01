@@ -15,11 +15,11 @@ module.exports = {
         poppins: ['Poppins', ...defaultTheme.fontFamily.sans]
       },
       colors: {
-        light: '#F3F1EE',
+        light: '#F1F1F1',
         primary: '#E86036',
-        secondary: '#C0A693',
-        dark: '#A68362',
-        darker: '#30342C'
+        secondary: '#9A9BA5',
+        dark: '#BE4D48',
+        darker: '#2D2D3C'
       }
     }
   },

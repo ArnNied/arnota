@@ -13,6 +13,7 @@ export default function NoteList({ notes }: NoteListProps): JSX.Element {
       {notes.map((note, index) => (
         <div key={index} className=''>
           <NoteCard
+            href={note.id}
             title={`${note.id.toString()} | ${note.title}`}
             body={note.body}
           />

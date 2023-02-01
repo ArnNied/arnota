@@ -1,6 +1,8 @@
 import { LoremIpsum } from 'lorem-ipsum';
 import slugify from 'slugify';
 
+import { nanoid } from 'nanoid';
+
 import { setNotes } from '@/store/slices/notesSlice';
 import { setCategories } from '@/store/slices/notesCategorySlice';
 
@@ -32,9 +34,9 @@ export function setNotesIfReduxStateIsEmpty(
   const temp: TNote[] = [];
   for (let i = 0; i < 20; i++)
     temp.push({
-      id: i.toString(),
+      id: nanoid(16),
       title: lorem.generateWords(5),
-      body: lorem.generateSentences(Math.floor(Math.random() * 5)),
+      body: lorem.generateSentences(Math.floor(Math.random() * 200)),
       category: slugify(
         MOCK_CATEGORIES[Math.floor(Math.random() * MOCK_CATEGORIES.length)],
         {
