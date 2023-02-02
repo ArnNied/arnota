@@ -25,7 +25,7 @@ export const noteSlice = createSlice({
   }
 });
 
-export const { setCategories, updateCategory, deleteCategory, addCategory } =
+export const { addCategory, setCategories, updateCategory, deleteCategory } =
   noteSlice.actions;
 
 export default noteSlice.reducer;
