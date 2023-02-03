@@ -2,9 +2,8 @@ import { useEffect } from 'react';
 
 import NoteList from '@/components/note/NoteList';
 import Navbar from '@/components/shared/Navbar';
-
-import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { setNotesIfReduxStateIsEmpty } from '@/core/utils';
+import { useAppDispatch, useAppSelector } from '@/store/hooks';
 
 export default function MainPage(): JSX.Element {
   const dispatch = useAppDispatch();

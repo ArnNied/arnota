@@ -1,4 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit';
+
 import type { TNote } from '@/types/note';
 import type { PayloadAction } from '@reduxjs/toolkit';
 

@@ -1,11 +1,14 @@
+import { HardBreak } from '@tiptap/extension-hard-break';
 import { Placeholder } from '@tiptap/extension-placeholder';
 import { useEditor } from '@tiptap/react';
 import { StarterKit } from '@tiptap/starter-kit';
-import { useDispatch } from 'react-redux';
 import { nanoid } from 'nanoid';
-import Tiptap from '@/components/shared/Tiptap';
+import { useDispatch } from 'react-redux';
+
 import Navbar from '@/components/shared/Navbar';
+import Tiptap from '@/components/shared/Tiptap';
 import { addNote } from '@/store/slices/notesSlice';
+
 import type { NextPage } from 'next';
 
 const NoteCreatePage: NextPage = () => {
@@ -14,6 +17,13 @@ const NoteCreatePage: NextPage = () => {
   const editor = useEditor({
     extensions: [
       StarterKit,
+      HardBreak.extend({
+        addKeyboardShortcuts() {
+          return {
+            Enter: () => this.editor.commands.setHardBreak()
+          };
+        }
+      }),
       Placeholder.configure({
         placeholder: 'Record Your Ideas Here'
       })

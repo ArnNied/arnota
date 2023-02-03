@@ -1,6 +1,7 @@
 import Masonry, { ResponsiveMasonry } from 'react-responsive-masonry';
 
 import NoteCard from './NoteCard';
+
 import type { TNote } from '@/types/note';
 
 type NoteListProps = {

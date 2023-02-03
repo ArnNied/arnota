@@ -1,11 +1,10 @@
 import { useRouter } from 'next/router';
 import { useEffect } from 'react';
 
-import { useAppDispatch, useAppSelector } from '@/store/hooks';
-import { setNotesIfReduxStateIsEmpty } from '@/core/utils';
-
-import Navbar from '@/components/shared/Navbar';
 import NoteList from '@/components/note/NoteList';
+import Navbar from '@/components/shared/Navbar';
+import { setNotesIfReduxStateIsEmpty } from '@/core/utils';
+import { useAppDispatch, useAppSelector } from '@/store/hooks';
 
 import type { NextPage } from 'next';
 

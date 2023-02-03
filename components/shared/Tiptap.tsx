@@ -1,6 +1,7 @@
 import { EditorContent } from '@tiptap/react';
-import { AiOutlineBold, AiOutlineItalic } from 'react-icons/ai';
 import { clsx } from 'clsx';
+import { AiOutlineBold, AiOutlineItalic } from 'react-icons/ai';
+
 import type { useEditor } from '@tiptap/react';
 
 type TiptapProps = {

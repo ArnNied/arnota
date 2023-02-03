@@ -53,6 +53,8 @@
         ],
         "warnOnUnassignedImports": true,
         "pathGroupsExcludedImportTypes": ["type"],
+        "alphabetize": { "order": "asc" },
+        "newlines-between": "always",
         "groups": [
           "builtin",
           "external",

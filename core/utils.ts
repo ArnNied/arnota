@@ -1,10 +1,9 @@
 import { LoremIpsum } from 'lorem-ipsum';
+import { nanoid } from 'nanoid';
 import slugify from 'slugify';
 
-import { nanoid } from 'nanoid';
-
-import { setNotes } from '@/store/slices/notesSlice';
 import { setCategories } from '@/store/slices/notesCategorySlice';
+import { setNotes } from '@/store/slices/notesSlice';
 
 import type { useAppDispatch } from '@/store/hooks';
 import type { TNote } from '@/types/note';

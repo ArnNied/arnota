@@ -1,12 +1,16 @@
-import { useEffect, useState } from 'react';
+import { generateHTML } from '@tiptap/core';
+import { StarterKit } from '@tiptap/starter-kit';
+import DOMPurify from 'dompurify';
+import parse from 'html-react-parser';
 import { useRouter } from 'next/router';
-
-import { useAppSelector } from '@/store/hooks';
+import { useEffect, useMemo, useState } from 'react';
 
 import Navbar from '@/components/shared/Navbar';
 import Topbar from '@/components/shared/Topbar';
+import { useAppSelector } from '@/store/hooks';
 
 import type { TNote } from '@/types/note';
+import type { JSONContent } from '@tiptap/core';
 import type { NextPage } from 'next';
 
 const NoteDetailPage: NextPage = () => {
@@ -16,6 +20,27 @@ const NoteDetailPage: NextPage = () => {
   const { noteId } = router.query;
 
   const [note, setNote] = useState<TNote>();
+
+  const output = useMemo(() => {
+    if (!note) return null;
+
+    try {
+      const generatedHTML: string = generateHTML(
+        JSON.parse(note?.body) as JSONContent,
+        [StarterKit]
+      );
+      console.log(generatedHTML);
+
+      const sanitized = DOMPurify.sanitize(generatedHTML);
+
+      console.log(sanitized);
+
+      // const sanitized;
+      return generatedHTML;
+    } catch (error) {
+      return note.body;
+    }
+  }, [note]);
 
   useEffect(() => {
     if (!router.isReady) return;
@@ -44,7 +69,9 @@ const NoteDetailPage: NextPage = () => {
           <h3 className='mt-2 font-semibold text-secondary'>
             Category: {note?.category}{' '}
           </h3>
-          <p className='mt-4 font-poppins text-darker'>{note?.body}</p>
+          <p className='mt-4 font-poppins text-darker whitespace-pre-wrap'>
+            {parse(output ?? '')}
+          </p>
         </div>
       </div>
     </>

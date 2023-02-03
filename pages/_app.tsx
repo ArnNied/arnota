@@ -1,10 +1,10 @@
 import '@/styles/globals.css';
 
 import Head from 'next/head';
-
 import { Provider } from 'react-redux';
 
 import { store } from '@/store/store';
+
 import type { AppProps } from 'next/app';
 
 // TODO: Remove title in this file and add it to each page
