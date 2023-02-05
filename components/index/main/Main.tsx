@@ -8,6 +8,7 @@ import { useAppDispatch, useAppSelector } from '@/store/hooks';
 export default function MainPage(): JSX.Element {
   const dispatch = useAppDispatch();
   const notesSelector = useAppSelector((state) => state.notes);
+  const notesCategorySelector = useAppSelector((state) => state.notesCategory);
 
   useEffect(() => {
     if (notesSelector.length !== 0) return;
@@ -18,7 +19,7 @@ export default function MainPage(): JSX.Element {
   }, []);
   return (
     <>
-      <Navbar />
+      <Navbar categories={notesCategorySelector} />
       <div className='w-4/5 flex flex-col ml-auto pb-12 bg-light'>
         <div className='h-full px-4 py-4'>
           <div className='pb-4 border-b border-secondary'>

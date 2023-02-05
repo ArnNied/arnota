@@ -14,8 +14,11 @@ const CategoryPage: NextPage = () => {
   const { category } = router.query;
 
   const notesSelector = useAppSelector((state) =>
-    state.notes.filter((note) => note.category === category)
+    state.notes.filter(
+      (note) => note.category === (category as string)?.split('-').join(' ')
+    )
   );
+  const notesCategorySelector = useAppSelector((state) => state.notesCategory);
 
   useEffect(() => {
     if (notesSelector.length !== 0) return;
@@ -27,7 +30,7 @@ const CategoryPage: NextPage = () => {
 
   return (
     <>
-      <Navbar />
+      <Navbar categories={notesCategorySelector} />
       <div className='w-4/5 flex flex-col ml-auto pb-12 bg-light'>
         <div className='h-full px-4 py-4'>
           <div className='pb-4 border-b border-secondary'>

@@ -1,8 +1,8 @@
-type TTopbarProps = {
+type TopbarProps = {
   author: string;
 };
 
-export default function Topbar({ author }: TTopbarProps): JSX.Element {
+export default function Topbar({ author }: TopbarProps): JSX.Element {
   return (
     <div className='w-[inherit] flex flex-row px-4 py-2 bg-light text-darker fixed'>
       <div className='flex flex-row grow justify-start'>By: {author}</div>

@@ -1,13 +1,13 @@
 import Link from 'next/link';
 import slugify from 'slugify';
 
-import { useAppSelector } from '@/store/hooks';
-
 import NavbarLink from './NavbarLink';
 
-export default function Navbar(): JSX.Element {
-  const categoriesSelector = useAppSelector((state) => state.notesCategory);
+type NavbarProps = {
+  categories?: string[];
+};
 
+export default function Navbar({ categories }: NavbarProps): JSX.Element {
   return (
     <nav className='w-1/5 flex flex-col h-screen bg-primary fixed'>
       <Link href='/'>
@@ -23,13 +23,14 @@ export default function Navbar(): JSX.Element {
           <NavbarLink href='/favorites' text='Favorites' />
         </div>
         <div className='my-4 overflow-y-auto'>
-          {categoriesSelector.map((category) => (
-            <NavbarLink
-              key={category}
-              href={`/category/${slugify(category, { lower: true })}`}
-              text={category}
-            />
-          ))}
+          {categories &&
+            categories.map((category) => (
+              <NavbarLink
+                key={category}
+                href={`/category/${slugify(category)}`}
+                text={category}
+              />
+            ))}
         </div>
         <div className='mt-auto mb-4 pt-4 border-t space-y-1'>
           <NavbarLink href='/profile' text='Profile' />
