@@ -1,22 +1,29 @@
+import { useRouter } from 'next/router';
 import { useEffect } from 'react';
+import { useAuthState } from 'react-firebase-hooks/auth';
 
 import NoteList from '@/components/note/NoteList';
 import Navbar from '@/components/shared/Navbar';
+import { auth } from '@/core/firebase';
 import { setNotesIfReduxStateIsEmpty } from '@/core/utils';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 
 export default function MainPage(): JSX.Element {
+  const router = useRouter();
   const dispatch = useAppDispatch();
+
+  const [user, loading, error] = useAuthState(auth);
+
   const notesSelector = useAppSelector((state) => state.notes);
   const notesCategorySelector = useAppSelector((state) => state.notesCategory);
 
   useEffect(() => {
-    if (notesSelector.length !== 0) return;
-
-    setNotesIfReduxStateIsEmpty(dispatch);
+    if (error) console.log('Error in MainPage useEffect', error);
+    else if (user) setNotesIfReduxStateIsEmpty(dispatch);
+    else if (!loading) void router.push('/login');
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [user, loading]);
   return (
     <>
       <Navbar categories={notesCategorySelector} />

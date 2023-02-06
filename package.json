@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "next lint",
     "test": "jest --passWithNoTests",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "auth": "firebase emulators:start --only auth"
   },
   "dependencies": {
     "@next/font": "13.1.4",
@@ -25,6 +26,7 @@
     "eslint": "^8.32.0",
     "eslint-config-next": "13.1.4",
     "firebase": "^9.16.0",
+    "firebase-tools": "^11.22.0",
     "html-react-parser": "^3.0.8",
     "next": "13.1.4",
     "prosemirror-commands": "^1.5.0",
@@ -39,6 +41,7 @@
     "prosemirror-view": "^1.30.0",
     "react": "18.2.0",
     "react-dom": "18.2.0",
+    "react-firebase-hooks": "^5.1.1",
     "react-icons": "^4.7.1",
     "react-redux": "^8.0.5",
     "slugify": "^1.6.5",

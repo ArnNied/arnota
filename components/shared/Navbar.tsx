@@ -1,5 +1,9 @@
 import Link from 'next/link';
+import { useRouter } from 'next/router';
+import { useSignOut } from 'react-firebase-hooks/auth';
 import slugify from 'slugify';
+
+import { auth } from '@/core/firebase';
 
 import NavbarLink from './NavbarLink';
 
@@ -8,6 +12,17 @@ type NavbarProps = {
 };
 
 export default function Navbar({ categories }: NavbarProps): JSX.Element {
+  const router = useRouter();
+
+  const [signOut, loading, error] = useSignOut(auth);
+
+  async function handleLogout(): Promise<void> {
+    const success = await signOut();
+
+    if (success) void router.push('/login');
+    else console.log('Failed to log out', error);
+  }
+
   return (
     <nav className='w-1/5 flex flex-col h-screen bg-primary fixed'>
       <Link href='/'>
@@ -35,7 +50,10 @@ export default function Navbar({ categories }: NavbarProps): JSX.Element {
         <div className='mt-auto mb-4 pt-4 border-t space-y-1'>
           <NavbarLink href='/profile' text='Profile' />
           <NavbarLink href='/settings' text='Settings' />
-          <button className='w-full py-0.5 px-2 hover:bg-secondary text-light text-right rounded inline-block'>
+          <button
+            onClick={handleLogout}
+            className='w-full py-0.5 px-2 hover:bg-secondary/70 text-light text-right rounded inline-block'
+          >
             Logout
           </button>
         </div>
