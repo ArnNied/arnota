@@ -1,7 +1,10 @@
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
-import { useCreateUserWithEmailAndPassword } from 'react-firebase-hooks/auth';
+import {
+  useAuthState,
+  useCreateUserWithEmailAndPassword
+} from 'react-firebase-hooks/auth';
 
 import { auth } from '@/core/firebase';
 
@@ -10,15 +13,22 @@ import type { NextPage } from 'next';
 const RegisterPage: NextPage = () => {
   const router = useRouter();
 
+  const [user, loading, error] = useAuthState(auth);
   const [
     createUserWithEmailAndPassword,
-    user,
+    registrationUser,
     registrationLoading,
     registrationError
   ] = useCreateUserWithEmailAndPassword(auth, { sendEmailVerification: true });
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+
+  useEffect(() => {
+    if (loading || !router.isReady) return;
+    if (error) console.log('Error in RegisterPage useEffect', error);
+    else if (user) void router.push('/');
+  }, [user, loading, error, router]);
 
   async function handleSubmit(
     e: React.FormEvent<HTMLFormElement>
@@ -30,10 +40,13 @@ const RegisterPage: NextPage = () => {
     else if (password.length < 6)
       return alert('Password must be at least 6 characters long');
 
-    const user = await createUserWithEmailAndPassword(email, password);
+    const registeredUser = await createUserWithEmailAndPassword(
+      email,
+      password
+    );
 
-    if (user) {
-      console.log('User created', user);
+    if (registeredUser) {
+      console.log('User created', registeredUser);
 
       await router.push('/');
     } else console.log('User not created', registrationError);

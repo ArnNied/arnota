@@ -37,16 +37,17 @@ export default function Navbar({ categories }: NavbarProps): JSX.Element {
           <NavbarLink href='/browse' text='Browse' />
           <NavbarLink href='/favorites' text='Favorites' />
         </div>
-        <div className='my-4 overflow-y-auto'>
-          {categories &&
-            categories.map((category) => (
+        {categories && (
+          <div className='my-4 overflow-y-auto'>
+            {categories.map((category) => (
               <NavbarLink
                 key={category}
                 href={`/category/${slugify(category)}`}
                 text={category}
               />
             ))}
-        </div>
+          </div>
+        )}
         <div className='mt-auto mb-4 pt-4 border-t space-y-1'>
           <NavbarLink href='/profile' text='Profile' />
           <NavbarLink href='/settings' text='Settings' />

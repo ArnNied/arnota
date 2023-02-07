@@ -1,12 +1,10 @@
 import { configureStore } from '@reduxjs/toolkit';
 
-import notesCategoriesReducer from './slices/notesCategorySlice';
 import notesReducer from './slices/notesSlice';
 
 export const store = configureStore({
   reducer: {
-    notes: notesReducer,
-    notesCategory: notesCategoriesReducer
+    personalNotes: notesReducer
   }
 });
 

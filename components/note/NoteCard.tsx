@@ -17,7 +17,9 @@ export default function NoteCard({
       className='w-full max-h-40 flex flex-col p-2.5 bg-white font-poppins shadow hover:shadow-md hover:shadow-primary/50 rounded overflow-hidden'
     >
       <h2 className='font-semibold text-darker break-words'>{title}</h2>
-      <p className='text-sm text-darker break-words'>{body}</p>
+      <p className='text-sm text-darker whitespace-pre-wrap'>
+        {body.length > 300 ? body.slice(0, 300) : body}
+      </p>
     </Link>
   );
 }

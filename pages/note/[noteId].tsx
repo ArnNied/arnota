@@ -5,7 +5,7 @@ import parse from 'html-react-parser';
 import { useRouter } from 'next/router';
 import { useEffect, useMemo, useState } from 'react';
 
-import Navbar from '@/components/shared/Navbar';
+import MainLayout from '@/components/layouts/MainLayout';
 import Topbar from '@/components/shared/Topbar';
 import { useAppSelector } from '@/store/hooks';
 
@@ -15,8 +15,8 @@ import type { NextPage } from 'next';
 
 const NoteDetailPage: NextPage = () => {
   const router = useRouter();
-  const notesSelector = useAppSelector((state) => state.notes);
-  const notesCategorySelector = useAppSelector((state) => state.notesCategory);
+
+  const personalNotesSelector = useAppSelector((state) => state.personalNotes);
 
   const { noteId } = router.query;
 
@@ -42,55 +42,55 @@ const NoteDetailPage: NextPage = () => {
   useEffect(() => {
     if (!router.isReady) return;
 
-    if (notesSelector.length === 0) {
-      void router.push('/');
-      return;
-    }
+    // if (notesSelector.length === 0) {
+    //   void router.push('/');
+    //   return;
+    // }
 
-    const currentNote = notesSelector.find((note) => note.id === noteId);
+    const currentNote = personalNotesSelector.notes.find(
+      (note) => note.id === noteId
+    );
+    console.log(personalNotesSelector);
 
-    if (!currentNote) {
-      void router.push('/');
-      return;
-    }
+    // if (!currentNote) {
+    //   void router.push('/');
+    //   return;
+    // }
     setNote(currentNote);
     // fetch(`/api/note/${noteId}`)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [router.isReady, notesSelector]);
+  }, [router.isReady, personalNotesSelector]);
 
   return (
-    <>
-      <Navbar categories={notesCategorySelector} />
-      <div className='w-4/5 flex flex-col ml-auto pb-12 bg-light'>
-        <Topbar author='(Me)' />
-        <div className='h-full px-8 py-4 mt-12'>
-          <h2 className='font-bold font-poppins text-4xl text-darker'>
-            {note?.title}
-          </h2>
-          <div className='flex flex-row mt-2 space-x-4'>
+    <MainLayout navbarCategories={personalNotesSelector.categories}>
+      <Topbar author='(Me)' />
+      <div className='h-full px-8 py-4 mt-12'>
+        <h2 className='font-bold font-poppins text-4xl text-darker'>
+          {note?.title}
+        </h2>
+        <div className='flex flex-row mt-2 space-x-4'>
+          <h3 className='font-semibold text-secondary'>
+            Last modified: {note?.lastModified}
+          </h3>
+
+          {note?.category && (
             <h3 className='font-semibold text-secondary'>
-              Last modified: {note?.lastModified}
+              Category: {note?.category}
             </h3>
+          )}
 
-            {note?.category && (
-              <h3 className='font-semibold text-secondary'>
-                Category: {note?.category}
-              </h3>
-            )}
-
-            {note?.tags?.length !== 0 && (
-              <h3 className='font-semibold text-secondary'>
-                Tags: {note?.tags?.join(', ')}
-              </h3>
-            )}
-          </div>
-
-          <p className='mt-4 font-poppins text-darker whitespace-pre-wrap'>
-            {parse(output ?? '')}
-          </p>
+          {note?.tags?.length !== 0 && (
+            <h3 className='font-semibold text-secondary'>
+              Tags: {note?.tags?.join(', ')}
+            </h3>
+          )}
         </div>
+
+        <p className='mt-4 font-poppins text-darker whitespace-pre-wrap'>
+          {parse(output ?? '')}
+        </p>
       </div>
-    </>
+    </MainLayout>
   );
 };
 

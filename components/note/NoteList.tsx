@@ -15,7 +15,7 @@ export default function NoteList({ notes }: NoteListProps): JSX.Element {
         <div key={index} className=''>
           <NoteCard
             href={note.id}
-            title={`${note.id.toString()} | ${note.title}`}
+            title={`${note.id} | ${note.title}`}
             body={note.body}
           />
         </div>

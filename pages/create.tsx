@@ -3,13 +3,16 @@ import { Placeholder } from '@tiptap/extension-placeholder';
 import { useEditor } from '@tiptap/react';
 import { StarterKit } from '@tiptap/starter-kit';
 import { nanoid } from 'nanoid';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useAuthState } from 'react-firebase-hooks/auth';
 import { useDispatch } from 'react-redux';
 
-import Navbar from '@/components/shared/Navbar';
-import Tiptap from '@/components/shared/Tiptap';
+import MainLayout from '@/components/layouts/MainLayout';
+import InputWithLabel from '@/components/shared/InputWithLabel';
+import Tiptap from '@/components/tiptap/Tiptap';
+import { auth } from '@/core/firebase';
+import { setNotesIfReduxStateIsEmpty } from '@/core/utils';
 import { useAppSelector } from '@/store/hooks';
-import { addCategory } from '@/store/slices/notesCategorySlice';
 import { addNote } from '@/store/slices/notesSlice';
 import { EVisibility } from '@/types/note';
 
@@ -18,12 +21,24 @@ import type { NextPage } from 'next';
 const NoteCreatePage: NextPage = () => {
   const dispatch = useDispatch();
 
-  const notesCategorySelector = useAppSelector((state) => state.notesCategory);
+  const [user, loading, error] = useAuthState(auth);
+
+  const personalNotesSelector = useAppSelector((state) => state.personalNotes);
 
   const [title, setTitle] = useState('');
   const [category, setCategory] = useState('');
   const [tags, setTags] = useState('');
   const [visibility, setVisibility] = useState(EVisibility.PUBLIC);
+
+  useEffect(() => {
+    if (loading) return;
+    if (error) console.log('Error in MainPage useEffect', error);
+    else if (user && personalNotesSelector.hasBeenFetched === false)
+      setNotesIfReduxStateIsEmpty(dispatch);
+    // else if (!loading) void router.push('/login');
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user, loading, personalNotesSelector]);
 
   const editor = useEditor({
     extensions: [
@@ -74,103 +89,75 @@ const NoteCreatePage: NextPage = () => {
         lastModified: now
       })
     );
-
-    if (category !== '') dispatch(addCategory(category));
   }
 
   return (
-    <>
-      <Navbar categories={notesCategorySelector} />
-      <div className='w-4/5 flex flex-col ml-auto pb-12 bg-light'>
-        <div className='h-full px-4 py-4'>
-          <h2 className='font-bold text-3xl text-darker'>
-            Start capturing your ideas
-          </h2>
-          <form onSubmit={handleSubmit} className='mt-4'>
-            <div className='space-y-1'>
-              <label htmlFor='title' className='text-darker'>
-                Title
-              </label>
-              <input
-                id='title'
-                type='text'
-                name='title'
-                placeholder='Your Captivating Title'
-                autoComplete='off'
-                className='block w-full px-2 py-1 text-xl border-2 border-secondary focus:border-primary rounded focus:outline-none'
-                onChange={(e): void => setTitle(e.target.value)}
-              />
-            </div>
-            <div className='mt-2 space-y-1'>
-              <label className='text-darker'>Body</label>
-              <Tiptap editor={editor} />
-            </div>
-            <div className='mt-2 space-y-1'>
-              <label htmlFor='category' className='text-darker'>
-                Category <span className='text-gray-500'>(optional)</span>
-              </label>
-              <input
-                id='category'
-                type='text'
-                name='category'
-                placeholder='Categorize your note for easy search'
-                autoComplete='off'
-                className='block w-72 px-2 py-1 border-2 border-secondary focus:border-primary rounded focus:outline-none'
-                onChange={(e): void => setCategory(e.target.value)}
-              />
-            </div>
-            <div className='mt-2 space-y-1'>
-              <label htmlFor='tags' className='text-darker'>
-                Tags{' '}
-                <span className='text-gray-500'>
-                  (optional, separate with comma)
-                </span>
-              </label>
-              <input
-                id='tags'
-                type='text'
-                name='tags'
-                placeholder='Organize them further with multiple tags for composite search'
-                autoComplete='off'
-                className='block w-full px-2 py-1 border-2 border-secondary focus:border-primary rounded focus:outline-none'
-                onChange={(e): void => setTags(e.target.value)}
-              />
-            </div>
-            <div className='mt-2 space-y-1'>
-              <label htmlFor='visibility' className='text-darker'>
-                Visibility
-              </label>
-              <select
-                id='visibility'
-                name='visibility'
-                className='block w-32 px-2 py-1 bg-white border-2 border-secondary focus:border-primary rounded focus:outline-none'
-              >
-                <option onClick={(): void => setVisibility(EVisibility.PUBLIC)}>
-                  Public
-                </option>
-                <option
-                  onClick={(): void => setVisibility(EVisibility.UNLISTED)}
-                >
-                  Unlisted
-                </option>
-                <option
-                  onClick={(): void => setVisibility(EVisibility.PRIVATE)}
-                >
-                  Private
-                </option>
-              </select>
-            </div>
-
-            <button
-              type='submit'
-              className='mt-2 px-2 py-1 bg-primary text-light rounded'
+    <MainLayout navbarCategories={personalNotesSelector.categories}>
+      <div className='h-full px-4 py-4'>
+        <h2 className='font-bold text-3xl text-darker'>
+          Start capturing your ideas
+        </h2>
+        <form onSubmit={handleSubmit} className='mt-4 space-y-2'>
+          <InputWithLabel
+            id='title'
+            label='Title'
+            placeholder='Your Captivating Title'
+            additionalLabelClass='font-semibold text-lg'
+            additionalInputClass='font-semibold text-lg'
+            onChangeHandler={(e): void => setTitle(e.target.value)}
+          />
+          <div className='space-y-1'>
+            <label className='font-semibold text-lg text-darker'>Body</label>
+            <Tiptap editor={editor} />
+          </div>
+          <InputWithLabel
+            id='category'
+            label='Category'
+            hint='(optional)'
+            placeholder='Categorize your note for easy search'
+            widthClass='w-72'
+            onChangeHandler={(e): void => setCategory(e.target.value)}
+          />
+          <InputWithLabel
+            id='tags'
+            label='Tags'
+            hint='(optional, separate with comma)'
+            placeholder='Organize them further with multiple tags for composite search'
+            onChangeHandler={(e): void => setTags(e.target.value)}
+          />
+          <div className='space-y-1'>
+            <label htmlFor='visibility' className='text-darker'>
+              Visibility
+            </label>
+            <select
+              id='visibility'
+              name='visibility'
+              className='block w-32 px-2 py-1 bg-white border-2 border-secondary focus:border-primary rounded focus:outline-none'
             >
-              Save
-            </button>
-          </form>
-        </div>
+              <option
+                selected
+                onClick={(): void => setVisibility(EVisibility.PUBLIC)}
+              >
+                Public
+              </option>
+              <option onClick={(): void => setVisibility(EVisibility.UNLISTED)}>
+                Unlisted
+              </option>
+              <option onClick={(): void => setVisibility(EVisibility.PRIVATE)}>
+                Private
+              </option>
+            </select>
+          </div>
+
+          <button
+            type='submit'
+            className='mt-2 px-2 py-1 bg-primary text-light rounded'
+          >
+            Save
+          </button>
+        </form>
       </div>
-    </>
+    </MainLayout>
   );
 };
 

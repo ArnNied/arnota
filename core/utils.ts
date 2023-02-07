@@ -1,7 +1,6 @@
 import { LoremIpsum } from 'lorem-ipsum';
 import { nanoid } from 'nanoid';
 
-import { setCategories } from '@/store/slices/notesCategorySlice';
 import { setNotes } from '@/store/slices/notesSlice';
 import { EVisibility } from '@/types/note';
 
@@ -43,18 +42,10 @@ export function setNotesIfReduxStateIsEmpty(
           ? MOCK_CATEGORIES[Math.floor(Math.random() * MOCK_CATEGORIES.length)]
           : null,
       visibility: EVisibility.PUBLIC,
+      tags: [],
       createdAt: now,
       lastModified: now
     });
 
-  const pickedCategories = temp.reduce((acc, note) => {
-    if (note.category !== null) {
-      const index = acc.findIndex((category) => category === note.category);
-      if (index === -1) acc.push(note.category);
-    }
-    return acc;
-  }, [] as string[]);
-
   dispatcher(setNotes(temp));
-  dispatcher(setCategories(pickedCategories));
 }
