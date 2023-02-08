@@ -3,7 +3,7 @@ import { useRouter } from 'next/router';
 import { useSignOut } from 'react-firebase-hooks/auth';
 import slugify from 'slugify';
 
-import { auth } from '@/core/firebase';
+import { auth } from '@/lib/firebase/core';
 
 import NavbarLink from './NavbarLink';
 
@@ -19,7 +19,7 @@ export default function Navbar({ categories }: NavbarProps): JSX.Element {
   async function handleLogout(): Promise<void> {
     const success = await signOut();
 
-    if (success) void router.push('/login');
+    if (success) await router.push('/');
     else console.log('Failed to log out', error);
   }
 
@@ -37,7 +37,7 @@ export default function Navbar({ categories }: NavbarProps): JSX.Element {
           <NavbarLink href='/browse' text='Browse' />
           <NavbarLink href='/favorites' text='Favorites' />
         </div>
-        {categories && (
+        {categories && categories.length !== 0 && (
           <div className='my-4 overflow-y-auto'>
             {categories.map((category) => (
               <NavbarLink

@@ -1,11 +1,16 @@
 import { createSlice } from '@reduxjs/toolkit';
 
-import type { TNote } from '@/types/note';
+import type { TNoteWithId } from '@/types/note';
 import type { PayloadAction } from '@reduxjs/toolkit';
 
+function setCategories(acc: string[], note: TNoteWithId): string[] {
+  if (note.category && !acc.includes(note.category)) acc.push(note.category);
+  return acc;
+}
+
 type TInitialState = {
-  notes: TNote[];
-  categories: string[];
+  notes: TNoteWithId[];
+  categories: ReturnType<typeof setCategories>;
   hasBeenFetched: boolean;
 };
 
@@ -15,22 +20,18 @@ const initialState: TInitialState = {
   hasBeenFetched: false
 };
 
-function setCategories(acc: string[], note: TNote): string[] {
-  if (note.category && !acc.includes(note.category)) acc.push(note.category);
-  return acc;
-}
 export const noteSlice = createSlice({
   name: 'notes',
   initialState: initialState,
   reducers: {
-    setNotes: (_state, action: PayloadAction<TNote[]>) => {
+    setNotes: (_state, action: PayloadAction<TNoteWithId[]>) => {
       return {
         notes: action.payload,
         categories: action.payload.reduce(setCategories, [] as string[]),
         hasBeenFetched: true
       };
     },
-    updateNote: (state, action: PayloadAction<TNote>) => {
+    updateNote: (state, action: PayloadAction<TNoteWithId>) => {
       const index = state.notes.findIndex(
         (note) => note.id === action.payload.id
       );
@@ -46,7 +47,7 @@ export const noteSlice = createSlice({
         state.categories = state.notes.reduce(setCategories, [] as string[]);
       }
     },
-    addNote: (state, action: PayloadAction<TNote>) => {
+    addNote: (state, action: PayloadAction<TNoteWithId>) => {
       const index = state.notes.findIndex(
         (note) => note.id === action.payload.id
       );

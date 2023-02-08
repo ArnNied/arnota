@@ -3,7 +3,7 @@ import { useRouter } from 'next/router';
 import { useState } from 'react';
 import { useSignInWithEmailAndPassword } from 'react-firebase-hooks/auth';
 
-import { auth } from '@/core/firebase';
+import { auth } from '@/lib/firebase/core';
 
 import type { NextPage } from 'next';
 

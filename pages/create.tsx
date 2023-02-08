@@ -2,7 +2,7 @@ import { HardBreak } from '@tiptap/extension-hard-break';
 import { Placeholder } from '@tiptap/extension-placeholder';
 import { useEditor } from '@tiptap/react';
 import { StarterKit } from '@tiptap/starter-kit';
-import { nanoid } from 'nanoid';
+import { addDoc } from 'firebase/firestore';
 import { useEffect, useState } from 'react';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { useDispatch } from 'react-redux';
@@ -10,12 +10,14 @@ import { useDispatch } from 'react-redux';
 import MainLayout from '@/components/layouts/MainLayout';
 import InputWithLabel from '@/components/shared/InputWithLabel';
 import Tiptap from '@/components/tiptap/Tiptap';
-import { auth } from '@/core/firebase';
-import { setNotesIfReduxStateIsEmpty } from '@/core/utils';
+import { auth } from '@/lib/firebase/core';
+import { notesCollection } from '@/lib/firebase/firestore';
+import { setNotesIfReduxStateIsEmpty } from '@/lib/utils';
 import { useAppSelector } from '@/store/hooks';
 import { addNote } from '@/store/slices/notesSlice';
 import { EVisibility } from '@/types/note';
 
+import type { TNoteWithId } from '@/types/note';
 import type { NextPage } from 'next';
 
 const NoteCreatePage: NextPage = () => {
@@ -30,22 +32,16 @@ const NoteCreatePage: NextPage = () => {
   const [tags, setTags] = useState('');
   const [visibility, setVisibility] = useState(EVisibility.PUBLIC);
 
-  useEffect(() => {
-    if (loading) return;
-    if (error) console.log('Error in MainPage useEffect', error);
-    else if (user && personalNotesSelector.hasBeenFetched === false)
-      setNotesIfReduxStateIsEmpty(dispatch);
-    // else if (!loading) void router.push('/login');
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user, loading, personalNotesSelector]);
-
   const editor = useEditor({
     extensions: [
-      StarterKit,
+      StarterKit.configure({
+        hardBreak: false
+      }),
       HardBreak.extend({
         addKeyboardShortcuts() {
           return {
+            'Mod-Enter': () => this.editor.commands.setHardBreak(),
+            'Shift-Enter': () => this.editor.commands.setHardBreak(),
             Enter: () => this.editor.commands.setHardBreak()
           };
         }
@@ -71,24 +67,42 @@ const NoteCreatePage: NextPage = () => {
     }
   });
 
-  function handleSubmit(e: React.FormEvent<HTMLFormElement>): void {
+  useEffect(() => {
+    if (loading) return;
+    if (error) console.log('Error in NoteCreatePage useEffect', error);
+    else if (user && personalNotesSelector.hasBeenFetched === false)
+      void setNotesIfReduxStateIsEmpty(user.uid, dispatch);
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user, loading, personalNotesSelector]);
+
+  async function handleSubmit(
+    e: React.FormEvent<HTMLFormElement>
+  ): Promise<void> {
     e.preventDefault();
 
     const body = editor?.getJSON();
     const now: number = Date.now();
 
-    dispatch(
-      addNote({
-        id: nanoid(),
-        title: title !== '' ? title : 'Untitled',
-        body: JSON.stringify(body),
-        visibility: visibility,
-        category: category !== '' ? category : null,
-        tags: tags === '' ? [] : tags.split(','),
-        createdAt: now,
-        lastModified: now
-      })
-    );
+    const note = {
+      owner: user?.uid as string,
+      title: title !== '' ? title : 'Untitled',
+      body: JSON.stringify(body),
+      visibility: visibility,
+      category: category !== '' ? category : null,
+      tags: tags === '' ? [] : tags.split(','),
+      createdAt: now,
+      lastModified: now
+    };
+
+    const docRef = await addDoc(notesCollection, note);
+
+    const noteWithId: TNoteWithId = {
+      id: docRef.id,
+      ...note
+    };
+
+    dispatch(addNote(noteWithId));
   }
 
   return (
@@ -133,17 +147,24 @@ const NoteCreatePage: NextPage = () => {
               id='visibility'
               name='visibility'
               className='block w-32 px-2 py-1 bg-white border-2 border-secondary focus:border-primary rounded focus:outline-none'
+              defaultValue={EVisibility.PUBLIC}
             >
               <option
-                selected
+                value={EVisibility.PUBLIC}
                 onClick={(): void => setVisibility(EVisibility.PUBLIC)}
               >
                 Public
               </option>
-              <option onClick={(): void => setVisibility(EVisibility.UNLISTED)}>
+              <option
+                value={EVisibility.UNLISTED}
+                onClick={(): void => setVisibility(EVisibility.UNLISTED)}
+              >
                 Unlisted
               </option>
-              <option onClick={(): void => setVisibility(EVisibility.PRIVATE)}>
+              <option
+                value={EVisibility.PRIVATE}
+                onClick={(): void => setVisibility(EVisibility.PRIVATE)}
+              >
                 Private
               </option>
             </select>

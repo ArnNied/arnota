@@ -1,6 +1,7 @@
 // import { getAnalytics } from 'firebase/analytics';
 import { initializeApp } from 'firebase/app';
 import { getAuth, connectAuthEmulator } from 'firebase/auth';
+import { getFirestore, connectFirestoreEmulator } from 'firebase/firestore';
 
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
@@ -13,9 +14,12 @@ const firebaseConfig = {
   measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID
 };
 
-export const app = initializeApp(firebaseConfig);
-// export const analytics = getAnalytics(app);
-export const auth = getAuth(app);
+export const firebaseApp = initializeApp(firebaseConfig);
+// export const analytics = getAnalytics(firebaseApp);
+export const auth = getAuth(firebaseApp);
+export const db = getFirestore(firebaseApp);
 
-if (process.env.NODE_ENV === 'development')
+if (process.env.NODE_ENV === 'development') {
+  connectFirestoreEmulator(db, 'localhost', 8080);
   connectAuthEmulator(auth, 'http://localhost:9099');
+}

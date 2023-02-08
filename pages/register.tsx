@@ -6,7 +6,7 @@ import {
   useCreateUserWithEmailAndPassword
 } from 'react-firebase-hooks/auth';
 
-import { auth } from '@/core/firebase';
+import { auth } from '@/lib/firebase/core';
 
 import type { NextPage } from 'next';
 
@@ -27,7 +27,11 @@ const RegisterPage: NextPage = () => {
   useEffect(() => {
     if (loading || !router.isReady) return;
     if (error) console.log('Error in RegisterPage useEffect', error);
-    else if (user) void router.push('/');
+    else if (user)
+      router
+        .push('/')
+        .then(() => console.log('User logged in'))
+        .catch((err) => console.log('Error in RegisterPage useEffect', err));
   }, [user, loading, error, router]);
 
   async function handleSubmit(

@@ -2,10 +2,10 @@ import Masonry, { ResponsiveMasonry } from 'react-responsive-masonry';
 
 import NoteCard from './NoteCard';
 
-import type { TNote } from '@/types/note';
+import type { TNoteWithId } from '@/types/note';
 
 type NoteListProps = {
-  notes: TNote[];
+  notes: TNoteWithId[];
 };
 
 export default function NoteList({ notes }: NoteListProps): JSX.Element {

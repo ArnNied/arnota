@@ -1,13 +1,18 @@
 import { generateHTML } from '@tiptap/core';
 import { StarterKit } from '@tiptap/starter-kit';
 import DOMPurify from 'dompurify';
+import { doc, getDoc } from 'firebase/firestore';
 import parse from 'html-react-parser';
 import { useRouter } from 'next/router';
 import { useEffect, useMemo, useState } from 'react';
+import { useAuthState } from 'react-firebase-hooks/auth';
 
 import MainLayout from '@/components/layouts/MainLayout';
 import Topbar from '@/components/shared/Topbar';
-import { useAppSelector } from '@/store/hooks';
+import { auth, db } from '@/lib/firebase/core';
+import { notesCollection } from '@/lib/firebase/firestore';
+import { setNotesIfReduxStateIsEmpty } from '@/lib/utils';
+import { useAppDispatch, useAppSelector } from '@/store/hooks';
 
 import type { TNote } from '@/types/note';
 import type { JSONContent } from '@tiptap/core';
@@ -15,6 +20,9 @@ import type { NextPage } from 'next';
 
 const NoteDetailPage: NextPage = () => {
   const router = useRouter();
+  const dispatch = useAppDispatch();
+
+  const [user, loading, error] = useAuthState(auth);
 
   const personalNotesSelector = useAppSelector((state) => state.personalNotes);
 
@@ -40,24 +48,33 @@ const NoteDetailPage: NextPage = () => {
   }, [note]);
 
   useEffect(() => {
-    if (!router.isReady) return;
+    if (!router.isReady || loading) return;
 
-    // if (notesSelector.length === 0) {
-    //   void router.push('/');
-    //   return;
-    // }
+    if (error) console.log('Error in NoteDetailPage useEffect', error);
+    else if (user && personalNotesSelector.hasBeenFetched === false)
+      void setNotesIfReduxStateIsEmpty(user.uid, dispatch);
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [router.isReady, loading]);
+
+  useEffect(() => {
+    if (!router.isReady) return;
 
     const currentNote = personalNotesSelector.notes.find(
       (note) => note.id === noteId
     );
-    console.log(personalNotesSelector);
 
-    // if (!currentNote) {
-    //   void router.push('/');
-    //   return;
-    // }
+    if (!currentNote) {
+      const docRef = doc(db, notesCollection.path, noteId as string);
+      const docSnap = getDoc(docRef).then((doc) => {
+        if (doc.exists()) {
+          const data = doc.data() as TNote;
+          setNote(data);
+        }
+      });
+    }
     setNote(currentNote);
-    // fetch(`/api/note/${noteId}`)
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [router.isReady, personalNotesSelector]);
 
@@ -86,9 +103,9 @@ const NoteDetailPage: NextPage = () => {
           )}
         </div>
 
-        <p className='mt-4 font-poppins text-darker whitespace-pre-wrap'>
+        <div className='mt-4 font-poppins text-darker whitespace-pre-wrap'>
           {parse(output ?? '')}
-        </p>
+        </div>
       </div>
     </MainLayout>
   );

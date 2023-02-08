@@ -9,7 +9,7 @@
     "lint": "next lint",
     "test": "jest --passWithNoTests",
     "prepare": "husky install",
-    "auth": "firebase emulators:start --only auth"
+    "fb": "firebase emulators:start"
   },
   "dependencies": {
     "@next/font": "13.1.4",

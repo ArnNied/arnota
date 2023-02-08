@@ -5,8 +5,7 @@ export enum EVisibility {
 }
 
 export type TNote = {
-  // owner: string,
-  id: string;
+  owner: string;
   title: string;
   body: string;
   category: null | string;
@@ -14,4 +13,8 @@ export type TNote = {
   tags?: string[];
   createdAt: number;
   lastModified: number;
+};
+
+export type TNoteWithId = TNote & {
+  id: string;
 };
