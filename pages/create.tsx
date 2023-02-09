@@ -1,7 +1,4 @@
-import { HardBreak } from '@tiptap/extension-hard-break';
-import { Placeholder } from '@tiptap/extension-placeholder';
 import { useEditor } from '@tiptap/react';
-import { StarterKit } from '@tiptap/starter-kit';
 import { addDoc } from 'firebase/firestore';
 import { useEffect, useState } from 'react';
 import { useAuthState } from 'react-firebase-hooks/auth';
@@ -12,6 +9,7 @@ import InputWithLabel from '@/components/shared/InputWithLabel';
 import Tiptap from '@/components/tiptap/Tiptap';
 import { auth } from '@/lib/firebase/core';
 import { notesCollection } from '@/lib/firebase/firestore';
+import { configuredEditor } from '@/lib/tiptap';
 import { setNotesIfReduxStateIsEmpty } from '@/lib/utils';
 import { useAppSelector } from '@/store/hooks';
 import { addNote } from '@/store/slices/notesSlice';
@@ -32,40 +30,7 @@ const NoteCreatePage: NextPage = () => {
   const [tags, setTags] = useState('');
   const [visibility, setVisibility] = useState(EVisibility.PUBLIC);
 
-  const editor = useEditor({
-    extensions: [
-      StarterKit.configure({
-        hardBreak: false
-      }),
-      HardBreak.extend({
-        addKeyboardShortcuts() {
-          return {
-            'Mod-Enter': () => this.editor.commands.setHardBreak(),
-            'Shift-Enter': () => this.editor.commands.setHardBreak(),
-            Enter: () => this.editor.commands.setHardBreak()
-          };
-        }
-      }),
-      Placeholder.configure({
-        placeholder: 'Record your ideas here'
-      })
-    ],
-    editorProps: {
-      attributes: {
-        class: 'min-h-[10rem] px-2 p-1 rounded focus:outline-none'
-      }
-    },
-    onFocus: () => {
-      document
-        .getElementById('tiptap-editor-container')
-        ?.classList.replace('border-secondary', 'border-primary');
-    },
-    onBlur() {
-      document
-        .getElementById('tiptap-editor-container')
-        ?.classList.replace('border-primary', 'border-secondary');
-    }
-  });
+  const editor = useEditor(configuredEditor);
 
   useEffect(() => {
     if (loading) return;

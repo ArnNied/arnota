@@ -3,9 +3,11 @@ import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import {
   useAuthState,
-  useCreateUserWithEmailAndPassword
+  useCreateUserWithEmailAndPassword,
+  useUpdateProfile
 } from 'react-firebase-hooks/auth';
 
+import InputWithLabel from '@/components/shared/InputWithLabel';
 import { auth } from '@/lib/firebase/core';
 
 import type { NextPage } from 'next';
@@ -20,7 +22,9 @@ const RegisterPage: NextPage = () => {
     registrationLoading,
     registrationError
   ] = useCreateUserWithEmailAndPassword(auth, { sendEmailVerification: true });
+  const [updateProfile, updating, updateProfileError] = useUpdateProfile(auth);
 
+  const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
@@ -52,6 +56,13 @@ const RegisterPage: NextPage = () => {
     if (registeredUser) {
       console.log('User created', registeredUser);
 
+      const updateProfileSuccess = await updateProfile({
+        displayName: username
+      });
+
+      if (updateProfileSuccess)
+        console.log('Profile updated', updateProfileSuccess);
+
       await router.push('/');
     } else console.log('User not created', registrationError);
   }
@@ -60,26 +71,25 @@ const RegisterPage: NextPage = () => {
     <div className='p-4 bg-white rounded centered'>
       <h2 className='text-2xl text-center'>Register</h2>
       <form onSubmit={handleSubmit} className='mt-4'>
-        <div className='space-y-1'>
-          <label htmlFor='email'>Email</label>
-          <input
-            type='email'
-            id='email'
-            placeholder='Email'
-            className='block w-full px-2 py-1 border-2 border-secondary focus:border-primary focus:outline-none rounded'
-            autoComplete='off'
-            onChange={(e): void => setEmail(e.target.value)}
+        <div className='space-y-2'>
+          <InputWithLabel
+            id='username'
+            label='Username'
+            type='text'
+            onChangeHandler={(e): void => setUsername(e.target.value)}
           />
-        </div>
-        <div className='mt-2 space-y-1'>
-          <label htmlFor='password'>Password</label>
-          <input
-            type='password'
+          <InputWithLabel
+            id='email'
+            label='Email'
+            type='email'
+            onChangeHandler={(e): void => setEmail(e.target.value)}
+          />
+          <InputWithLabel
             id='password'
+            label='Password'
+            type='password'
             placeholder='Password'
-            className='block w-full px-2 py-1 border-2 border-secondary focus:border-primary focus:outline-none rounded'
-            autoComplete='off'
-            onChange={(e): void => setPassword(e.target.value)}
+            onChangeHandler={(e): void => setPassword(e.target.value)}
           />
         </div>
         <button

@@ -1,4 +1,4 @@
-import Masonry, { ResponsiveMasonry } from 'react-responsive-masonry';
+import Masonry from 'react-responsive-masonry';
 
 import NoteCard from './NoteCard';
 
@@ -15,8 +15,10 @@ export default function NoteList({ notes }: NoteListProps): JSX.Element {
         <div key={index} className=''>
           <NoteCard
             href={note.id}
-            title={`${note.id} | ${note.title}`}
+            title={note.title}
             body={note.body}
+            createdAt={note.createdAt}
+            owner={note.owner}
           />
         </div>
       ))}

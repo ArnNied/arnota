@@ -38,7 +38,7 @@ export default function InputWithLabel({
         id={id}
         type={type ?? 'text'}
         name={name ?? id}
-        placeholder={placeholder ?? ''}
+        placeholder={placeholder ?? label}
         autoComplete={autoComplete ? 'on' : 'off'}
         className={clsx(
           'block px-2 py-1 border-2 border-secondary focus:border-primary rounded focus:outline-none',

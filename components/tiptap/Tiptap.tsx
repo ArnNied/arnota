@@ -1,5 +1,6 @@
 import { EditorContent } from '@tiptap/react';
 import { AiOutlineBold, AiOutlineItalic } from 'react-icons/ai';
+import { BiHeading } from 'react-icons/bi';
 
 import TiptapExtensionButton from './TiptapExtensionButton';
 
@@ -15,7 +16,7 @@ export default function Tiptap({ editor }: TiptapProps): JSX.Element {
       id='tiptap-editor-container'
       className='w-full bg-white border-2 border-secondary rounded'
     >
-      <div className='p-1'>
+      <div className='flex flex-row p-1'>
         <TiptapExtensionButton
           Icon={AiOutlineBold}
           isActive={editor?.isActive('bold')}
@@ -28,6 +29,30 @@ export default function Tiptap({ editor }: TiptapProps): JSX.Element {
           isActive={editor?.isActive('italic')}
           onClickHandler={(): boolean | undefined =>
             editor?.chain().focus().toggleItalic().run()
+          }
+        />
+        <TiptapExtensionButton
+          Icon={BiHeading}
+          textAfter='1'
+          isActive={editor?.isActive('heading', { level: 1 })}
+          onClickHandler={(): boolean | undefined =>
+            editor?.chain().focus().toggleHeading({ level: 1 }).run()
+          }
+        />
+        <TiptapExtensionButton
+          Icon={BiHeading}
+          textAfter='2'
+          isActive={editor?.isActive('heading', { level: 2 })}
+          onClickHandler={(): boolean | undefined =>
+            editor?.chain().focus().toggleHeading({ level: 2 }).run()
+          }
+        />
+        <TiptapExtensionButton
+          Icon={BiHeading}
+          textAfter='3'
+          isActive={editor?.isActive('heading', { level: 3 })}
+          onClickHandler={(): boolean | undefined =>
+            editor?.chain().focus().toggleHeading({ level: 3 }).run()
           }
         />
       </div>

@@ -1,5 +1,4 @@
 import { generateHTML } from '@tiptap/core';
-import { StarterKit } from '@tiptap/starter-kit';
 import DOMPurify from 'dompurify';
 import { doc, getDoc } from 'firebase/firestore';
 import parse from 'html-react-parser';
@@ -11,6 +10,7 @@ import MainLayout from '@/components/layouts/MainLayout';
 import Topbar from '@/components/shared/Topbar';
 import { auth, db } from '@/lib/firebase/core';
 import { notesCollection } from '@/lib/firebase/firestore';
+import { configuredExtension } from '@/lib/tiptap';
 import { setNotesIfReduxStateIsEmpty } from '@/lib/utils';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 
@@ -36,7 +36,7 @@ const NoteDetailPage: NextPage = () => {
     try {
       const generatedHTML = generateHTML(
         JSON.parse(note?.body) as JSONContent,
-        [StarterKit]
+        configuredExtension
       );
 
       const sanitized = DOMPurify.sanitize(generatedHTML);
@@ -86,18 +86,18 @@ const NoteDetailPage: NextPage = () => {
           {note?.title}
         </h2>
         <div className='flex flex-row mt-2 space-x-4'>
-          <h3 className='font-semibold text-secondary'>
+          <h3 className='font-semibold text-sm italic text-secondary'>
             Last modified: {note?.lastModified}
           </h3>
 
           {note?.category && (
-            <h3 className='font-semibold text-secondary'>
+            <h3 className='font-semibold text-sm italic text-secondary'>
               Category: {note?.category}
             </h3>
           )}
 
           {note?.tags?.length !== 0 && (
-            <h3 className='font-semibold text-secondary'>
+            <h3 className='font-semibold text-sm italic text-secondary'>
               Tags: {note?.tags?.join(', ')}
             </h3>
           )}
