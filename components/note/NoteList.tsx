@@ -13,13 +13,7 @@ export default function NoteList({ notes }: NoteListProps): JSX.Element {
     <Masonry columnsCount={3} className='mt-4' gutter='1rem'>
       {notes.map((note, index) => (
         <div key={index} className=''>
-          <NoteCard
-            href={note.id}
-            title={note.title}
-            body={note.body}
-            createdAt={note.createdAt}
-            owner={note.owner}
-          />
+          <NoteCard note={note} />
         </div>
       ))}
     </Masonry>

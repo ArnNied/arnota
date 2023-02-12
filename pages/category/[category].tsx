@@ -5,7 +5,7 @@ import { useAuthState } from 'react-firebase-hooks/auth';
 import MainLayout from '@/components/layouts/MainLayout';
 import NoteList from '@/components/note/NoteList';
 import { auth } from '@/lib/firebase/core';
-import { setNotesIfReduxStateIsEmpty } from '@/lib/utils';
+import { isLoggedIn } from '@/lib/utils';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 
 import type { TNoteWithId } from '@/types/note';
@@ -22,14 +22,16 @@ const CategoryPage: NextPage = () => {
   const [filteredNotes, setFilteredNotes] = useState<TNoteWithId[]>([]);
 
   useEffect(() => {
-    if (!router.isReady || loading) return;
+    if (loading) return;
 
-    if (error) console.log('Error in CategoryPage useEffect', error);
-    else if (user && personalNotesSelector.hasBeenFetched === false)
-      void setNotesIfReduxStateIsEmpty(user.uid, dispatch);
+    if (error) {
+      console.log('Error getting authenticated user', error);
+    } else if (user && personalNotesSelector.hasBeenFetched === false) {
+      void isLoggedIn(user, dispatch);
+    }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [router.isReady, loading]);
+  }, [user, loading, error, personalNotesSelector]);
 
   useEffect(() => {
     setFilteredNotes(

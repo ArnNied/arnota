@@ -1,4 +1,3 @@
-import { HardBreak } from '@tiptap/extension-hard-break';
 import { Heading } from '@tiptap/extension-heading';
 import { Placeholder } from '@tiptap/extension-placeholder';
 import { mergeAttributes } from '@tiptap/react';
@@ -15,7 +14,7 @@ const CustomStarterKit = StarterKit.configure({
   heading: false
 });
 
-const CustomHeading = Heading.configure({ levels: [1, 2, 3, 4, 5] }).extend({
+const CustomHeading = Heading.configure({ levels: [1, 2, 3] }).extend({
   renderHTML({ node, HTMLAttributes }) {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
     const level: number = this.options.levels.includes(node.attrs.level)
@@ -35,7 +34,6 @@ const CustomHeading = Heading.configure({ levels: [1, 2, 3, 4, 5] }).extend({
 export const configuredExtension = [
   CustomStarterKit,
   CustomHeading,
-  HardBreak,
   Placeholder.configure({
     placeholder: 'Record your ideas here'
   })

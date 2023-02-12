@@ -1,7 +1,7 @@
 export enum EVisibility {
-  PUBLIC,
-  UNLISTED,
-  PRIVATE
+  PUBLIC = 'PUBLIC',
+  UNLISTED = 'UNLISTED',
+  PRIVATE = 'PRIVATE'
 }
 
 export type TNote = {
@@ -17,4 +17,8 @@ export type TNote = {
 
 export type TNoteWithId = TNote & {
   id: string;
+};
+
+export type TNoteWithIdAndUsername = TNoteWithId & {
+  ownerUsername: string;
 };

@@ -1,19 +1,23 @@
+import { doc, setDoc } from 'firebase/firestore';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import {
   useAuthState,
-  useCreateUserWithEmailAndPassword,
-  useUpdateProfile
+  useCreateUserWithEmailAndPassword
 } from 'react-firebase-hooks/auth';
 
 import InputWithLabel from '@/components/shared/InputWithLabel';
 import { auth } from '@/lib/firebase/core';
+import { usersCollection } from '@/lib/firebase/firestore';
+import { setAuthenticatedUserFunction } from '@/lib/utils';
+import { useAppDispatch } from '@/store/hooks';
 
 import type { NextPage } from 'next';
 
 const RegisterPage: NextPage = () => {
   const router = useRouter();
+  const dispatch = useAppDispatch();
 
   const [user, loading, error] = useAuthState(auth);
   const [
@@ -22,20 +26,23 @@ const RegisterPage: NextPage = () => {
     registrationLoading,
     registrationError
   ] = useCreateUserWithEmailAndPassword(auth, { sendEmailVerification: true });
-  const [updateProfile, updating, updateProfileError] = useUpdateProfile(auth);
 
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
+  // If user is already logged in, redirect to home page
   useEffect(() => {
     if (loading || !router.isReady) return;
-    if (error) console.log('Error in RegisterPage useEffect', error);
-    else if (user)
+
+    if (error) {
+      console.log('Error getting authenticated user', error);
+    } else if (user) {
       router
         .push('/')
-        .then(() => console.log('User logged in'))
-        .catch((err) => console.log('Error in RegisterPage useEffect', err));
+        .then(() => console.log('User already logged in'))
+        .catch((err) => console.log('Error redirecting', err));
+    }
   }, [user, loading, error, router]);
 
   async function handleSubmit(
@@ -43,10 +50,11 @@ const RegisterPage: NextPage = () => {
   ): Promise<void> {
     e.preventDefault();
 
-    if (email === '' || password === '')
+    if (email === '' || password === '') {
       return alert("Email or password can't be empty");
-    else if (password.length < 6)
+    } else if (password.length < 6) {
       return alert('Password must be at least 6 characters long');
+    }
 
     const registeredUser = await createUserWithEmailAndPassword(
       email,
@@ -56,15 +64,27 @@ const RegisterPage: NextPage = () => {
     if (registeredUser) {
       console.log('User created', registeredUser);
 
-      const updateProfileSuccess = await updateProfile({
-        displayName: username
-      });
+      try {
+        const userDocRef = doc(usersCollection, registeredUser.user.uid);
 
-      if (updateProfileSuccess)
-        console.log('Profile updated', updateProfileSuccess);
+        await setDoc(userDocRef, {
+          username
+        });
 
-      await router.push('/');
-    } else console.log('User not created', registrationError);
+        void setAuthenticatedUserFunction(registeredUser.user, dispatch);
+
+        await router.push('/');
+      } catch (error) {
+        console.log(
+          'Error setting new user document, delete registered user',
+          error
+        );
+
+        await registeredUser.user.delete();
+      }
+    } else {
+      console.log('User not created', registrationError);
+    }
   }
 
   return (

@@ -1,34 +1,59 @@
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { useState } from 'react';
-import { useSignInWithEmailAndPassword } from 'react-firebase-hooks/auth';
+import { useEffect, useState } from 'react';
+import {
+  useAuthState,
+  useSignInWithEmailAndPassword
+} from 'react-firebase-hooks/auth';
 
 import InputWithLabel from '@/components/shared/InputWithLabel';
 import { auth } from '@/lib/firebase/core';
+import { setAuthenticatedUserFunction } from '@/lib/utils';
+import { useAppDispatch } from '@/store/hooks';
 
 import type { NextPage } from 'next';
 
 const LoginPage: NextPage = () => {
   const router = useRouter();
+  const dispatch = useAppDispatch();
 
-  const [signInWithEmailAndPassword, user, loading, error] =
+  const [user, loading, error] = useAuthState(auth);
+  const [signInWithEmailAndPassword, signInUser, signInLoading, signInError] =
     useSignInWithEmailAndPassword(auth);
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+
+  // If user is already logged in, redirect to home page
+  useEffect(() => {
+    if (loading || !router.isReady) return;
+
+    if (error) {
+      console.log('Error getting authenticated user', error);
+    } else if (user) {
+      router
+        .push('/')
+        .then(() => console.log('User already logged in'))
+        .catch((err) => console.log('Error redirecting', err));
+    }
+  }, [user, loading, error, router]);
 
   async function handleSubmit(
     e: React.FormEvent<HTMLFormElement>
   ): Promise<void> {
     e.preventDefault();
 
-    const user = await signInWithEmailAndPassword(email, password);
+    const signedInUser = await signInWithEmailAndPassword(email, password);
 
-    if (user) {
-      console.log('User logged in', user);
+    if (signedInUser) {
+      console.log('User logged in', signedInUser);
+
+      void setAuthenticatedUserFunction(signedInUser.user, dispatch);
 
       await router.push('/');
-    } else console.log('Failed to log in', error);
+    } else {
+      console.log('Failed to log in', error);
+    }
   }
 
   return (
@@ -54,8 +79,8 @@ const LoginPage: NextPage = () => {
           type='submit'
           className='w-full mt-2 px-2 py-1 bg-primary text-white rounded'
         >
-          {loading && 'Loading...'}
-          {!loading && 'Login'}
+          {signInLoading && 'Loading...'}
+          {!signInLoading && 'Login'}
         </button>
         <div className='my-2 border'></div>
         <Link

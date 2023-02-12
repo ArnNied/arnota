@@ -8,13 +8,14 @@ import { useAuthState } from 'react-firebase-hooks/auth';
 
 import MainLayout from '@/components/layouts/MainLayout';
 import Topbar from '@/components/shared/Topbar';
-import { auth, db } from '@/lib/firebase/core';
-import { notesCollection } from '@/lib/firebase/firestore';
+import { auth } from '@/lib/firebase/core';
+import { notesCollection, usersCollection } from '@/lib/firebase/firestore';
 import { configuredExtension } from '@/lib/tiptap';
-import { setNotesIfReduxStateIsEmpty } from '@/lib/utils';
+import { isLoggedIn } from '@/lib/utils';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 
 import type { TNote } from '@/types/note';
+import type { TAuthenticatedUser, TUser } from '@/types/user';
 import type { JSONContent } from '@tiptap/core';
 import type { NextPage } from 'next';
 
@@ -24,11 +25,17 @@ const NoteDetailPage: NextPage = () => {
 
   const [user, loading, error] = useAuthState(auth);
 
+  const authenticatedUserSelector = useAppSelector(
+    (state) => state.authenticatedUser
+  );
   const personalNotesSelector = useAppSelector((state) => state.personalNotes);
 
   const { noteId } = router.query;
 
   const [note, setNote] = useState<TNote>();
+  const [owner, setOwner] = useState<TUser | TAuthenticatedUser>(
+    authenticatedUserSelector
+  );
 
   const output = useMemo(() => {
     if (!note) return null;
@@ -48,39 +55,64 @@ const NoteDetailPage: NextPage = () => {
   }, [note]);
 
   useEffect(() => {
-    if (!router.isReady || loading) return;
+    if (loading) return;
 
-    if (error) console.log('Error in NoteDetailPage useEffect', error);
-    else if (user && personalNotesSelector.hasBeenFetched === false)
-      void setNotesIfReduxStateIsEmpty(user.uid, dispatch);
+    if (error) {
+      console.log('Error getting authenticated user', error);
+    } else if (user && personalNotesSelector.hasBeenFetched === false) {
+      void isLoggedIn(user, dispatch);
+    }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [router.isReady, loading]);
+  }, [user, loading, error, personalNotesSelector]);
 
   useEffect(() => {
-    if (!router.isReady) return;
+    if (!router.isReady || !authenticatedUserSelector) return;
 
-    const currentNote = personalNotesSelector.notes.find(
+    const isAnOwnedNote = personalNotesSelector.notes.find(
       (note) => note.id === noteId
     );
 
-    if (!currentNote) {
-      const docRef = doc(db, notesCollection.path, noteId as string);
-      const docSnap = getDoc(docRef).then((doc) => {
-        if (doc.exists()) {
-          const data = doc.data() as TNote;
-          setNote(data);
-        }
-      });
+    if (isAnOwnedNote) {
+      setOwner(authenticatedUserSelector);
+      setNote(isAnOwnedNote);
+    } else {
+      const noteDocRef = doc(notesCollection, noteId as string);
+
+      getDoc(noteDocRef)
+        .then((noteDoc) => {
+          if (noteDoc.exists()) {
+            const noteDocData = noteDoc.data();
+
+            setNote(noteDocData);
+
+            // Get the owner of the note if it is not owned by the authenticated user
+            const userDocRef = doc(usersCollection, noteDocData.owner);
+            getDoc(userDocRef)
+              .then((userDoc) => {
+                if (userDoc.exists()) {
+                  setOwner(userDoc.data());
+                }
+              })
+              .catch((error) => {
+                console.log('Error getting document:', error);
+              });
+          }
+        })
+        .catch((error) => {
+          console.log('Error getting document:', error);
+        });
     }
-    setNote(currentNote);
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [router.isReady, personalNotesSelector]);
+  }, [router.isReady, personalNotesSelector, authenticatedUserSelector]);
 
   return (
     <MainLayout navbarCategories={personalNotesSelector.categories}>
-      <Topbar author='(Me)' />
+      <Topbar
+        owner={owner}
+        isOwner={note?.owner !== undefined && note?.owner === user?.uid}
+      />
       <div className='h-full px-8 py-4 mt-12'>
         <h2 className='font-bold font-poppins text-4xl text-darker'>
           {note?.title}

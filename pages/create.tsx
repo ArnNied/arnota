@@ -1,5 +1,6 @@
 import { useEditor } from '@tiptap/react';
 import { addDoc } from 'firebase/firestore';
+import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { useDispatch } from 'react-redux';
@@ -10,15 +11,16 @@ import Tiptap from '@/components/tiptap/Tiptap';
 import { auth } from '@/lib/firebase/core';
 import { notesCollection } from '@/lib/firebase/firestore';
 import { configuredEditor } from '@/lib/tiptap';
-import { setNotesIfReduxStateIsEmpty } from '@/lib/utils';
+import { isLoggedIn } from '@/lib/utils';
 import { useAppSelector } from '@/store/hooks';
 import { addNote } from '@/store/slices/notesSlice';
 import { EVisibility } from '@/types/note';
 
-import type { TNoteWithId } from '@/types/note';
+import type { TNoteWithId, TNote } from '@/types/note';
 import type { NextPage } from 'next';
 
 const NoteCreatePage: NextPage = () => {
+  const router = useRouter();
   const dispatch = useDispatch();
 
   const [user, loading, error] = useAuthState(auth);
@@ -34,12 +36,15 @@ const NoteCreatePage: NextPage = () => {
 
   useEffect(() => {
     if (loading) return;
-    if (error) console.log('Error in NoteCreatePage useEffect', error);
-    else if (user && personalNotesSelector.hasBeenFetched === false)
-      void setNotesIfReduxStateIsEmpty(user.uid, dispatch);
+
+    if (error) {
+      console.log('Error getting authenticated user', error);
+    } else if (user && personalNotesSelector.hasBeenFetched === false) {
+      void isLoggedIn(user, dispatch);
+    }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user, loading, personalNotesSelector]);
+  }, [user, loading, error, personalNotesSelector]);
 
   async function handleSubmit(
     e: React.FormEvent<HTMLFormElement>
@@ -49,9 +54,9 @@ const NoteCreatePage: NextPage = () => {
     const body = editor?.getJSON();
     const now: number = Date.now();
 
-    const note = {
+    const note: TNote = {
       owner: user?.uid as string,
-      title: title !== '' ? title : 'Untitled',
+      title: title || '',
       body: JSON.stringify(body),
       visibility: visibility,
       category: category !== '' ? category : null,
@@ -60,14 +65,20 @@ const NoteCreatePage: NextPage = () => {
       lastModified: now
     };
 
-    const docRef = await addDoc(notesCollection, note);
+    const noteDocRef = await addDoc(notesCollection, note);
 
-    const noteWithId: TNoteWithId = {
-      id: docRef.id,
-      ...note
-    };
+    if (noteDocRef.id) {
+      const noteWithId: TNoteWithId = {
+        id: noteDocRef.id,
+        ...note
+      };
 
-    dispatch(addNote(noteWithId));
+      dispatch(addNote(noteWithId));
+
+      await router.push(`/nota/${noteDocRef.id}`);
+    } else {
+      console.log('Error in NoteCreatePage handleSubmit');
+    }
   }
 
   return (
@@ -112,26 +123,17 @@ const NoteCreatePage: NextPage = () => {
               id='visibility'
               name='visibility'
               className='block w-32 px-2 py-1 bg-white border-2 border-secondary focus:border-primary rounded focus:outline-none'
-              defaultValue={EVisibility.PUBLIC}
+              defaultValue={visibility}
             >
-              <option
-                value={EVisibility.PUBLIC}
-                onClick={(): void => setVisibility(EVisibility.PUBLIC)}
-              >
-                Public
-              </option>
-              <option
-                value={EVisibility.UNLISTED}
-                onClick={(): void => setVisibility(EVisibility.UNLISTED)}
-              >
-                Unlisted
-              </option>
-              <option
-                value={EVisibility.PRIVATE}
-                onClick={(): void => setVisibility(EVisibility.PRIVATE)}
-              >
-                Private
-              </option>
+              {Object.values(EVisibility).map((visibility) => (
+                <option
+                  key={visibility}
+                  value={visibility}
+                  onClick={(): void => setVisibility(visibility)}
+                >
+                  {visibility}
+                </option>
+              ))}
             </select>
           </div>
 

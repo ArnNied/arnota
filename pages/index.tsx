@@ -4,7 +4,7 @@ import { useAuthState } from 'react-firebase-hooks/auth';
 import MainLayout from '@/components/layouts/MainLayout';
 import NoteList from '@/components/note/NoteList';
 import { auth } from '@/lib/firebase/core';
-import { setNotesIfReduxStateIsEmpty } from '@/lib/utils';
+import { isLoggedIn } from '@/lib/utils';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 
 import type { NextPage } from 'next';
@@ -18,12 +18,15 @@ const IndexPage: NextPage = () => {
 
   useEffect(() => {
     if (loading) return;
-    if (error) console.log('Error in IndexPage useEffect', error);
-    else if (user && personalNotesSelector.hasBeenFetched === false)
-      void setNotesIfReduxStateIsEmpty(user.uid, dispatch);
+
+    if (error) {
+      console.log('Error getting authenticated user', error);
+    } else if (user && personalNotesSelector.hasBeenFetched === false) {
+      void isLoggedIn(user, dispatch);
+    }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user, loading, personalNotesSelector]);
+  }, [user, loading, error, personalNotesSelector]);
 
   return (
     <>

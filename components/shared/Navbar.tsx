@@ -4,6 +4,8 @@ import { useSignOut } from 'react-firebase-hooks/auth';
 import slugify from 'slugify';
 
 import { auth } from '@/lib/firebase/core';
+import { useAppDispatch } from '@/store/hooks';
+import { clearAuthenticatedUser } from '@/store/slices/authenticatedUserSlice';
 
 import NavbarLink from './NavbarLink';
 
@@ -13,14 +15,20 @@ type NavbarProps = {
 
 export default function Navbar({ categories }: NavbarProps): JSX.Element {
   const router = useRouter();
+  const dispatch = useAppDispatch();
 
   const [signOut, loading, error] = useSignOut(auth);
 
   async function handleLogout(): Promise<void> {
     const success = await signOut();
 
-    if (success) await router.push('/');
-    else console.log('Failed to log out', error);
+    if (success) {
+      dispatch(clearAuthenticatedUser());
+
+      await router.push('/');
+    } else {
+      console.log('Failed to log out', error);
+    }
   }
 
   return (

@@ -1,27 +1,54 @@
-import { getDocs, query, where } from 'firebase/firestore';
+import { doc, getDoc, getDocs, query, where } from 'firebase/firestore';
 
+import { setAuthenticatedUser } from '@/store/slices/authenticatedUserSlice';
 import { setNotes } from '@/store/slices/notesSlice';
 
-import { notesCollection } from './firebase/firestore';
+import { notesCollection, usersCollection } from './firebase/firestore';
 
 import type { useAppDispatch } from '@/store/hooks';
 import type { TNoteWithId } from '@/types/note';
+import type { TUser } from '@/types/user';
+import type { User } from 'firebase/auth';
 
-export async function setNotesIfReduxStateIsEmpty(
-  userUid: string,
+// Populate the store with the user's notes
+// and set the authenticated user in case of a refresh
+export async function isLoggedIn(
+  user: User,
   dispatcher: ReturnType<typeof useAppDispatch>
 ): Promise<void> {
-  const q = query(notesCollection, where('owner', '==', userUid));
+  await setAuthenticatedUserFunction(user, dispatcher);
+
+  const q = query(notesCollection, where('owner', '==', user.uid));
 
   const querySnapshot = await getDocs(q);
   const temp: TNoteWithId[] = [];
-  querySnapshot.forEach((doc) => {
-    const data = doc.data();
+  querySnapshot.forEach((noteDoc) => {
+    const data = noteDoc.data();
     temp.push({
       ...data,
-      id: doc.id
+      id: noteDoc.id
     });
   });
 
   dispatcher(setNotes(temp));
+}
+
+// Set the authenticated user in the store
+// Prevents inconsistent dispatch calls
+export async function setAuthenticatedUserFunction(
+  user: User,
+  dispatcher: ReturnType<typeof useAppDispatch>
+): Promise<void> {
+  const userDocRef = doc(usersCollection, user.uid);
+  const userDocSnap = await getDoc(userDocRef);
+  const userDocData = userDocSnap.data() as TUser;
+
+  dispatcher(
+    setAuthenticatedUser({
+      uid: user.uid,
+      username: userDocData.username,
+      email: user.email ?? '',
+      emailVerified: user.emailVerified
+    })
+  );
 }
