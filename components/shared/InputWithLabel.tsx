@@ -3,6 +3,7 @@ import { clsx } from 'clsx';
 type InputWithLabelProps = {
   id: string;
   label: string;
+  value: string;
   name?: string;
   placeholder?: string;
   hint?: string;
@@ -19,9 +20,10 @@ export default function InputWithLabel({
   id,
   label,
   name,
+  value,
   placeholder,
   hint,
-  type,
+  type = 'text',
   autoComplete,
   widthClass,
   spaceBetweenClass,
@@ -36,8 +38,9 @@ export default function InputWithLabel({
       </label>
       <input
         id={id}
-        type={type ?? 'text'}
+        type={type}
         name={name ?? id}
+        value={value}
         placeholder={placeholder ?? label}
         autoComplete={autoComplete ? 'on' : 'off'}
         className={clsx(

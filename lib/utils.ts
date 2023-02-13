@@ -51,4 +51,6 @@ export async function setAuthenticatedUserFunction(
       emailVerified: user.emailVerified
     })
   );
+
+  return Promise.resolve();
 }

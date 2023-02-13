@@ -1,5 +1,5 @@
 import { useEditor } from '@tiptap/react';
-import { addDoc } from 'firebase/firestore';
+import { addDoc, doc, updateDoc } from 'firebase/firestore';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import { useAuthState } from 'react-firebase-hooks/auth';
@@ -13,15 +13,18 @@ import { notesCollection } from '@/lib/firebase/firestore';
 import { configuredEditor } from '@/lib/tiptap';
 import { isLoggedIn } from '@/lib/utils';
 import { useAppSelector } from '@/store/hooks';
-import { addNote } from '@/store/slices/notesSlice';
+import { addNote, updateNote } from '@/store/slices/notesSlice';
 import { EVisibility } from '@/types/note';
 
 import type { TNoteWithId, TNote } from '@/types/note';
+import type { Content } from '@tiptap/react';
 import type { NextPage } from 'next';
 
-const NoteCreatePage: NextPage = () => {
+const NoteEditPage: NextPage = () => {
   const router = useRouter();
   const dispatch = useDispatch();
+
+  const { noteId } = router.query;
 
   const [user, loading, error] = useAuthState(auth);
 
@@ -48,9 +51,32 @@ const NoteCreatePage: NextPage = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, loading, error, personalNotesSelector]);
 
-  async function handleSubmit(
-    e: React.FormEvent<HTMLFormElement>
-  ): Promise<void> {
+  useEffect(() => {
+    if (
+      !editor ||
+      !router.isReady ||
+      personalNotesSelector.hasBeenFetched == false
+    ) {
+      return;
+    }
+
+    const toBeEdited = personalNotesSelector.notes.find(
+      (note) => note.id === noteId
+    );
+
+    if (toBeEdited) {
+      setTitle(toBeEdited.title);
+      setCategory(toBeEdited.category as string);
+      setTags(toBeEdited.tags.join(', '));
+      setVisibility(toBeEdited.visibility);
+
+      editor.commands.setContent(JSON.parse(toBeEdited.body) as Content);
+    }
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [router.isReady, personalNotesSelector, editor]);
+
+  function handleSubmit(e: React.FormEvent<HTMLFormElement>): void {
     e.preventDefault();
 
     const body = editor?.getJSON();
@@ -67,20 +93,21 @@ const NoteCreatePage: NextPage = () => {
       lastModified: now
     };
 
-    const noteDocRef = await addDoc(notesCollection, note);
+    const noteDocRef = doc(notesCollection, noteId as string);
+    updateDoc(noteDocRef, note)
+      .then(async () => {
+        const noteWithId: TNoteWithId = {
+          id: noteDocRef.id,
+          ...note
+        };
 
-    if (noteDocRef.id) {
-      const noteWithId: TNoteWithId = {
-        id: noteDocRef.id,
-        ...note
-      };
+        dispatch(updateNote(noteWithId));
 
-      dispatch(addNote(noteWithId));
-
-      await router.push(`/nota/${noteDocRef.id}`);
-    } else {
-      console.log('Error in NoteCreatePage handleSubmit');
-    }
+        await router.push(`/nota/${noteDocRef.id}`);
+      })
+      .catch((error) => {
+        console.log('Error in NoteEditPage handleSubmit', error);
+      });
   }
 
   return (
@@ -154,4 +181,4 @@ const NoteCreatePage: NextPage = () => {
   );
 };
 
-export default NoteCreatePage;
+export default NoteEditPage;

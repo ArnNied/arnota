@@ -71,7 +71,11 @@ const RegisterPage: NextPage = () => {
           username
         });
 
-        void setAuthenticatedUserFunction(registeredUser.user, dispatch);
+        setAuthenticatedUserFunction(registeredUser.user, dispatch).catch(
+          (err) => {
+            console.log('Error setting authenticated user', err);
+          }
+        );
 
         await router.push('/');
       } catch (error) {
@@ -95,13 +99,14 @@ const RegisterPage: NextPage = () => {
           <InputWithLabel
             id='username'
             label='Username'
-            type='text'
+            value={username}
             onChangeHandler={(e): void => setUsername(e.target.value)}
           />
           <InputWithLabel
             id='email'
             label='Email'
             type='email'
+            value={email}
             onChangeHandler={(e): void => setEmail(e.target.value)}
           />
           <InputWithLabel
@@ -109,6 +114,7 @@ const RegisterPage: NextPage = () => {
             label='Password'
             type='password'
             placeholder='Password'
+            value={password}
             onChangeHandler={(e): void => setPassword(e.target.value)}
           />
         </div>

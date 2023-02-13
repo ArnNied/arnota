@@ -10,7 +10,7 @@ export type TNote = {
   body: string;
   category: null | string;
   visibility: EVisibility;
-  tags?: string[];
+  tags: string[];
   createdAt: number;
   lastModified: number;
 };

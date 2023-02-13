@@ -48,7 +48,9 @@ const LoginPage: NextPage = () => {
     if (signedInUser) {
       console.log('User logged in', signedInUser);
 
-      void setAuthenticatedUserFunction(signedInUser.user, dispatch);
+      setAuthenticatedUserFunction(signedInUser.user, dispatch).catch((err) => {
+        console.log('Error setting authenticated user', err);
+      });
 
       await router.push('/');
     } else {
@@ -65,6 +67,7 @@ const LoginPage: NextPage = () => {
             id='email'
             label='Email'
             type='email'
+            value={email}
             onChangeHandler={(e): void => setEmail(e.target.value)}
           />
           <InputWithLabel
@@ -72,6 +75,7 @@ const LoginPage: NextPage = () => {
             label='Password'
             type='password'
             placeholder='Password'
+            value={password}
             onChangeHandler={(e): void => setPassword(e.target.value)}
           />
         </div>

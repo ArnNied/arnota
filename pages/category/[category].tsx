@@ -27,7 +27,9 @@ const CategoryPage: NextPage = () => {
     if (error) {
       console.log('Error getting authenticated user', error);
     } else if (user && personalNotesSelector.hasBeenFetched === false) {
-      void isLoggedIn(user, dispatch);
+      isLoggedIn(user, dispatch).catch((err) => {
+        console.log('Error initializing state', err);
+      });
     }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps

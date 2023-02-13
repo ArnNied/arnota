@@ -60,7 +60,9 @@ const NoteDetailPage: NextPage = () => {
     if (error) {
       console.log('Error getting authenticated user', error);
     } else if (user && personalNotesSelector.hasBeenFetched === false) {
-      void isLoggedIn(user, dispatch);
+      isLoggedIn(user, dispatch).catch((err) => {
+        console.log('Error initializing state', err);
+      });
     }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -110,7 +112,8 @@ const NoteDetailPage: NextPage = () => {
   return (
     <MainLayout navbarCategories={personalNotesSelector.categories}>
       <Topbar
-        owner={owner}
+        noteId={noteId as string}
+        ownerUsername={owner.username}
         isOwner={note?.owner !== undefined && note?.owner === user?.uid}
       />
       <div className='h-full px-8 py-4 mt-12'>
