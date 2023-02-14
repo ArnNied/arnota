@@ -27,9 +27,9 @@ const NoteCreatePage: NextPage = () => {
 
   const personalNotesSelector = useAppSelector((state) => state.personalNotes);
 
-  const [title, setTitle] = useState('');
-  const [category, setCategory] = useState('');
-  const [tags, setTags] = useState('');
+  const [title, setTitle] = useState<string>('');
+  const [category, setCategory] = useState<string>('');
+  const [tags, setTags] = useState<string>('');
   const [visibility, setVisibility] = useState(EVisibility.PUBLIC);
 
   const editor = useEditor(configuredEditor);
@@ -60,8 +60,9 @@ const NoteCreatePage: NextPage = () => {
       owner: user?.uid as string,
       title: title || '',
       body: JSON.stringify(body),
+      plainBody: editor?.getText() ?? '',
       visibility: visibility,
-      category: category !== '' ? category : null,
+      category: category || '',
       tags: tags === '' ? [] : tags.split(','),
       createdAt: now,
       lastModified: now

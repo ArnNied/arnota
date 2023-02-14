@@ -19,6 +19,8 @@ const CategoryPage: NextPage = () => {
   const [user, loading, error] = useAuthState(auth);
 
   const personalNotesSelector = useAppSelector((state) => state.personalNotes);
+
+  const [search, setSearch] = useState<string>('');
   const [filteredNotes, setFilteredNotes] = useState<TNoteWithId[]>([]);
 
   useEffect(() => {
@@ -36,12 +38,26 @@ const CategoryPage: NextPage = () => {
   }, [user, loading, error, personalNotesSelector]);
 
   useEffect(() => {
-    setFilteredNotes(
-      personalNotesSelector.notes.filter(
-        (note) => note.category === (category as string).split('-').join(' ')
-      )
+    const filteredByCategory = personalNotesSelector.notes.filter(
+      (note) => note.category === (category as string).split('-').join(' ')
     );
-  }, [personalNotesSelector, category]);
+    if (search === '') {
+      setFilteredNotes(filteredByCategory);
+    } else {
+      const alsoFilteredBySearch = filteredByCategory.filter((note) => {
+        return (
+          note.title.toLowerCase().includes(search.toLowerCase()) ||
+          note.plainBody.toLowerCase().includes(search.toLowerCase()) ||
+          note.category.toLowerCase().includes(search.toLowerCase()) ||
+          note.tags.some((tag) =>
+            tag.toLowerCase().includes(search.toLowerCase())
+          )
+        );
+      });
+
+      setFilteredNotes(alsoFilteredBySearch);
+    }
+  }, [personalNotesSelector, category, search]);
 
   return (
     <MainLayout navbarCategories={personalNotesSelector.categories}>
@@ -51,6 +67,8 @@ const CategoryPage: NextPage = () => {
             type='text'
             placeholder='Search'
             className='px-2 py-1 rounded focus:outline-secondary focus:outline-none'
+            value={search}
+            onChange={(e): void => setSearch(e.target.value)}
           />
         </div>
         <NoteList notes={filteredNotes} />

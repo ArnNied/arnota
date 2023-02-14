@@ -8,7 +8,8 @@ export type TNote = {
   owner: string;
   title: string;
   body: string;
-  category: null | string;
+  plainBody: string;
+  category: string;
   visibility: EVisibility;
   tags: string[];
   createdAt: number;

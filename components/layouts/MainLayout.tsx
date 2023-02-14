@@ -12,7 +12,7 @@ export default function MainLayout({
   return (
     <>
       <Navbar categories={navbarCategories} />
-      <main className='w-4/5 flex flex-col ml-auto pb-12 bg-light'>
+      <main className='w-4/5 h-full flex flex-col ml-auto pb-12 bg-light'>
         {children}
       </main>
     </>
