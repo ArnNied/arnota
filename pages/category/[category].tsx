@@ -4,6 +4,7 @@ import { useAuthState } from 'react-firebase-hooks/auth';
 
 import MainLayout from '@/components/layouts/MainLayout';
 import NoteList from '@/components/note/NoteList';
+import SearchField from '@/components/shared/SearchField';
 import { auth } from '@/lib/firebase/core';
 import { isLoggedIn } from '@/lib/utils';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
@@ -63,12 +64,9 @@ const CategoryPage: NextPage = () => {
     <MainLayout navbarCategories={personalNotesSelector.categories}>
       <div className='h-full px-4 py-4'>
         <div className='pb-4 border-b border-secondary'>
-          <input
-            type='text'
-            placeholder='Search'
-            className='px-2 py-1 rounded focus:outline-secondary focus:outline-none'
+          <SearchField
             value={search}
-            onChange={(e): void => setSearch(e.target.value)}
+            onChangeHandler={(e): void => setSearch(e.target.value)}
           />
         </div>
         <NoteList notes={filteredNotes} />

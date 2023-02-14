@@ -2,11 +2,12 @@ import { doc, getDoc, getDocs, query, where } from 'firebase/firestore';
 
 import { setAuthenticatedUser } from '@/store/slices/authenticatedUserSlice';
 import { setNotes } from '@/store/slices/notesSlice';
+import { EVisibility } from '@/types/note';
 
 import { notesCollection, usersCollection } from './firebase/firestore';
 
 import type { useAppDispatch } from '@/store/hooks';
-import type { TNoteWithId } from '@/types/note';
+import type { TNoteWithId, TNote } from '@/types/note';
 import type { TUser } from '@/types/user';
 import type { User } from 'firebase/auth';
 
@@ -54,3 +55,15 @@ export async function setAuthenticatedUserFunction(
 
   return Promise.resolve();
 }
+
+export const emptyNote: TNote = {
+  owner: '',
+  title: '',
+  body: '',
+  plainBody: '',
+  category: '',
+  tags: [],
+  visibility: EVisibility.PUBLIC,
+  lastModified: 0,
+  createdAt: 0
+};
