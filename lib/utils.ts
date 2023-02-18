@@ -1,7 +1,7 @@
 import { doc, getDoc, getDocs, query, where } from 'firebase/firestore';
 
 import { setAuthenticatedUser } from '@/store/slices/authenticatedUserSlice';
-import { setNotes } from '@/store/slices/notesSlice';
+import { setNotes } from '@/store/slices/personalNotesSlice';
 import { EVisibility } from '@/types/note';
 
 import { notesCollection, usersCollection } from './firebase/firestore';
@@ -10,6 +10,18 @@ import type { useAppDispatch } from '@/store/hooks';
 import type { TNoteWithId, TNote } from '@/types/note';
 import type { TUser } from '@/types/user';
 import type { User } from 'firebase/auth';
+
+export const emptyNote: TNote = {
+  owner: '',
+  title: '',
+  body: '',
+  plainBody: '',
+  category: '',
+  tags: [],
+  visibility: EVisibility.PUBLIC,
+  lastModified: 0,
+  createdAt: 0
+};
 
 // Populate the store with the user's notes
 // and set the authenticated user in case of a refresh
@@ -55,15 +67,3 @@ export async function setAuthenticatedUserFunction(
 
   return Promise.resolve();
 }
-
-export const emptyNote: TNote = {
-  owner: '',
-  title: '',
-  body: '',
-  plainBody: '',
-  category: '',
-  tags: [],
-  visibility: EVisibility.PUBLIC,
-  lastModified: 0,
-  createdAt: 0
-};

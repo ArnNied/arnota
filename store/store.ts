@@ -1,7 +1,7 @@
 import { configureStore } from '@reduxjs/toolkit';
 
 import authenticatedUserReducer from './slices/authenticatedUserSlice';
-import notesReducer from './slices/notesSlice';
+import notesReducer from './slices/personalNotesSlice';
 
 export const store = configureStore({
   reducer: {

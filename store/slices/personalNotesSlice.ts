@@ -1,27 +1,25 @@
 import { createSlice } from '@reduxjs/toolkit';
 
 import type { TNoteWithId } from '@/types/note';
+import type { PersonalNotesSliceInitialState } from '@/types/slice';
 import type { PayloadAction } from '@reduxjs/toolkit';
 
-function setCategories(acc: string[], note: TNoteWithId): string[] {
+function setCategories(
+  acc: string[],
+  note: TNoteWithId
+): TNoteWithId['category'][] {
   if (note.category && !acc.includes(note.category)) acc.push(note.category);
   return acc;
 }
 
-type TInitialState = {
-  notes: TNoteWithId[];
-  categories: ReturnType<typeof setCategories>;
-  hasBeenFetched: boolean;
-};
-
-const initialState: TInitialState = {
+const initialState: PersonalNotesSliceInitialState = {
   notes: [],
   categories: [],
   hasBeenFetched: false
 };
 
 export const noteSlice = createSlice({
-  name: 'notes',
+  name: 'personalNotes',
   initialState: initialState,
   reducers: {
     setNotes: (_state, action: PayloadAction<TNoteWithId[]>) => {

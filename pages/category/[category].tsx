@@ -1,42 +1,23 @@
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
-import { useAuthState } from 'react-firebase-hooks/auth';
 
 import MainLayout from '@/components/layouts/MainLayout';
 import NoteList from '@/components/note/NoteList';
 import SearchField from '@/components/shared/SearchField';
-import { auth } from '@/lib/firebase/core';
-import { isLoggedIn } from '@/lib/utils';
-import { useAppDispatch, useAppSelector } from '@/store/hooks';
+import { useInitializeState } from '@/lib/hooks';
 
 import type { TNoteWithId } from '@/types/note';
 import type { NextPage } from 'next';
 
 const CategoryPage: NextPage = () => {
   const router = useRouter();
-  const dispatch = useAppDispatch();
+
   const { category } = router.query;
 
-  const [user, loading, error] = useAuthState(auth);
-
-  const personalNotesSelector = useAppSelector((state) => state.personalNotes);
+  const { personalNotesSelector } = useInitializeState();
 
   const [search, setSearch] = useState<string>('');
   const [filteredNotes, setFilteredNotes] = useState<TNoteWithId[]>([]);
-
-  useEffect(() => {
-    if (loading) return;
-
-    if (error) {
-      console.log('Error getting authenticated user', error);
-    } else if (user && personalNotesSelector.hasBeenFetched === false) {
-      isLoggedIn(user, dispatch).catch((err) => {
-        console.log('Error initializing state', err);
-      });
-    }
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user, loading, error, personalNotesSelector]);
 
   useEffect(() => {
     const filteredByCategory = personalNotesSelector.notes.filter(

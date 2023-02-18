@@ -17,7 +17,7 @@ export default function Navbar({ categories }: NavbarProps): JSX.Element {
   const router = useRouter();
   const dispatch = useAppDispatch();
 
-  const [signOut, loading, error] = useSignOut(auth);
+  const [signOut, , error] = useSignOut(auth);
 
   async function handleLogout(): Promise<void> {
     const success = await signOut();

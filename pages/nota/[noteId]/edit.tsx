@@ -2,17 +2,15 @@ import { useEditor } from '@tiptap/react';
 import { doc, updateDoc } from 'firebase/firestore';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
-import { useAuthState } from 'react-firebase-hooks/auth';
 import { useDispatch } from 'react-redux';
 
 import MainLayout from '@/components/layouts/MainLayout';
-import { CreateOrEdit } from '@/components/note/CreateOrEdit';
-import { auth } from '@/lib/firebase/core';
+import CreateOrEdit from '@/components/note/CreateOrEdit';
 import { notesCollection } from '@/lib/firebase/firestore';
+import { useInitializeState } from '@/lib/hooks';
 import { configuredEditor } from '@/lib/tiptap';
-import { emptyNote, isLoggedIn } from '@/lib/utils';
-import { useAppSelector } from '@/store/hooks';
-import { updateNote } from '@/store/slices/notesSlice';
+import { emptyNote } from '@/lib/utils';
+import { updateNote } from '@/store/slices/personalNotesSlice';
 
 import type { TNoteWithId, TNote } from '@/types/note';
 import type { Content } from '@tiptap/react';
@@ -24,27 +22,11 @@ const NoteEditPage: NextPage = () => {
 
   const { noteId } = router.query;
 
-  const [user, loading, error] = useAuthState(auth);
-
-  const personalNotesSelector = useAppSelector((state) => state.personalNotes);
+  const { personalNotesSelector } = useInitializeState();
 
   const [placeholderNote, setPlaceholderNote] = useState<TNote>(emptyNote);
 
   const editor = useEditor(configuredEditor);
-
-  useEffect(() => {
-    if (loading) return;
-
-    if (error) {
-      console.log('Error getting authenticated user', error);
-    } else if (user && personalNotesSelector.hasBeenFetched === false) {
-      isLoggedIn(user, dispatch).catch((err) => {
-        console.log('Error initializing state', err);
-      });
-    }
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user, loading, error, personalNotesSelector]);
 
   useEffect(() => {
     if (

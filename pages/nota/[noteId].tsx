@@ -4,15 +4,13 @@ import { doc, getDoc } from 'firebase/firestore';
 import parse from 'html-react-parser';
 import { useRouter } from 'next/router';
 import { useEffect, useMemo, useState } from 'react';
-import { useAuthState } from 'react-firebase-hooks/auth';
 
 import MainLayout from '@/components/layouts/MainLayout';
 import Topbar from '@/components/shared/Topbar';
-import { auth } from '@/lib/firebase/core';
 import { notesCollection, usersCollection } from '@/lib/firebase/firestore';
+import { useInitializeState } from '@/lib/hooks';
 import { configuredExtension } from '@/lib/tiptap';
-import { isLoggedIn } from '@/lib/utils';
-import { useAppDispatch, useAppSelector } from '@/store/hooks';
+import { useAppSelector } from '@/store/hooks';
 
 import type { TNote } from '@/types/note';
 import type { TAuthenticatedUser, TUser } from '@/types/user';
@@ -21,14 +19,12 @@ import type { NextPage } from 'next';
 
 const NoteDetailPage: NextPage = () => {
   const router = useRouter();
-  const dispatch = useAppDispatch();
 
-  const [user, loading, error] = useAuthState(auth);
+  const { authUser, personalNotesSelector } = useInitializeState();
 
   const authenticatedUserSelector = useAppSelector(
     (state) => state.authenticatedUser
   );
-  const personalNotesSelector = useAppSelector((state) => state.personalNotes);
 
   const { noteId } = router.query;
 
@@ -53,20 +49,6 @@ const NoteDetailPage: NextPage = () => {
       return note.body;
     }
   }, [note]);
-
-  useEffect(() => {
-    if (loading) return;
-
-    if (error) {
-      console.log('Error getting authenticated user', error);
-    } else if (user && personalNotesSelector.hasBeenFetched === false) {
-      isLoggedIn(user, dispatch).catch((err) => {
-        console.log('Error initializing state', err);
-      });
-    }
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user, loading, error, personalNotesSelector]);
 
   useEffect(() => {
     if (!router.isReady || !authenticatedUserSelector) return;
@@ -114,7 +96,7 @@ const NoteDetailPage: NextPage = () => {
       <Topbar
         noteId={noteId as string}
         ownerUsername={owner.username}
-        isOwner={note?.owner !== undefined && note?.owner === user?.uid}
+        isOwner={note?.owner !== undefined && note?.owner === authUser?.uid}
       />
       <div className='h-full px-8 py-4 mt-12'>
         <h2 className='font-bold font-poppins text-4xl text-darker'>

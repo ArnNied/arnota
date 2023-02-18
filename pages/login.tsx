@@ -1,13 +1,11 @@
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
-import {
-  useAuthState,
-  useSignInWithEmailAndPassword
-} from 'react-firebase-hooks/auth';
+import { useSignInWithEmailAndPassword } from 'react-firebase-hooks/auth';
 
 import InputWithLabel from '@/components/shared/InputWithLabel';
 import { auth } from '@/lib/firebase/core';
+import { useInitializeState } from '@/lib/hooks';
 import { setAuthenticatedUserFunction } from '@/lib/utils';
 import { useAppDispatch } from '@/store/hooks';
 
@@ -17,8 +15,9 @@ const LoginPage: NextPage = () => {
   const router = useRouter();
   const dispatch = useAppDispatch();
 
-  const [user, loading, error] = useAuthState(auth);
-  const [signInWithEmailAndPassword, signInUser, signInLoading, signInError] =
+  const { authUser } = useInitializeState();
+
+  const [signInWithEmailAndPassword, , signInLoading, signInError] =
     useSignInWithEmailAndPassword(auth);
 
   const [email, setEmail] = useState('');
@@ -26,17 +25,16 @@ const LoginPage: NextPage = () => {
 
   // If user is already logged in, redirect to home page
   useEffect(() => {
-    if (loading || !router.isReady) return;
+    if (authUser === undefined || !router.isReady) return;
 
-    if (error) {
-      console.log('Error getting authenticated user', error);
-    } else if (user) {
+    if (authUser) {
       router
         .push('/')
         .then(() => console.log('User already logged in'))
         .catch((err) => console.log('Error redirecting', err));
     }
-  }, [user, loading, error, router]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [authUser, router.isReady]);
 
   async function handleSubmit(
     e: React.FormEvent<HTMLFormElement>
@@ -54,7 +52,7 @@ const LoginPage: NextPage = () => {
 
       await router.push('/');
     } else {
-      console.log('Failed to log in', error);
+      console.log('Failed to log in', signInError);
     }
   }
 

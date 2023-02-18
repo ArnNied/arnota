@@ -1,11 +1,10 @@
 import { deleteDoc, doc } from 'firebase/firestore';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { AiOutlineEdit } from 'react-icons/ai';
 
 import { notesCollection } from '@/lib/firebase/firestore';
 import { useAppDispatch } from '@/store/hooks';
-import { deleteNote } from '@/store/slices/notesSlice';
+import { deleteNote } from '@/store/slices/personalNotesSlice';
 
 type TopbarProps = {
   noteId: string;
@@ -40,6 +39,7 @@ export default function Topbar({
         });
     }
   }
+
   return (
     <div className='w-[inherit] flex flex-row px-4 py-2 bg-light text-darker fixed'>
       <div className='flex flex-row grow justify-start'>

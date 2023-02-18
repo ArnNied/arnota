@@ -1,5 +1,3 @@
-import { useState } from 'react';
-
 import { EVisibility } from '@/types/note';
 
 import InputWithLabel from '../shared/InputWithLabel';
@@ -15,7 +13,7 @@ type SearchOrEditProps = {
   submitHandler: (e: React.FormEvent<HTMLFormElement>) => void;
 };
 
-export function CreateOrEdit({
+export default function CreateOrEdit({
   note,
   editor,
   setNoteHandler,
