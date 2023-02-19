@@ -35,7 +35,7 @@ const IndexPage: NextPage = () => {
 
   return (
     <>
-      {authUser && (
+      {authUser ? (
         <MainLayout navbarCategories={personalNotesSelector.categories}>
           <div className='h-full px-4 py-4'>
             <div className='pb-4 border-b border-secondary'>
@@ -51,8 +51,7 @@ const IndexPage: NextPage = () => {
             />
           </div>
         </MainLayout>
-      )}
-      {!authUser && (
+      ) : (
         <div className='bg-primary'>
           <h1>LandingPage</h1>
         </div>

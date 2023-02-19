@@ -12,6 +12,7 @@ export type TNote = {
   category: string;
   visibility: EVisibility;
   tags: string[];
+  favoritedBy: string[];
   createdAt: number;
   lastModified: number;
 };

@@ -12,7 +12,7 @@ import { useInitializeState } from '@/lib/hooks';
 import { configuredExtension } from '@/lib/tiptap';
 import { useAppSelector } from '@/store/hooks';
 
-import type { TNote } from '@/types/note';
+import type { TNoteWithId } from '@/types/note';
 import type { TAuthenticatedUser, TUser } from '@/types/user';
 import type { JSONContent } from '@tiptap/core';
 import type { NextPage } from 'next';
@@ -20,7 +20,7 @@ import type { NextPage } from 'next';
 const NoteDetailPage: NextPage = () => {
   const router = useRouter();
 
-  const { authUser, personalNotesSelector } = useInitializeState();
+  const { personalNotesSelector } = useInitializeState();
 
   const authenticatedUserSelector = useAppSelector(
     (state) => state.authenticatedUser
@@ -28,10 +28,8 @@ const NoteDetailPage: NextPage = () => {
 
   const { noteId } = router.query;
 
-  const [note, setNote] = useState<TNote>();
-  const [owner, setOwner] = useState<TUser | TAuthenticatedUser>(
-    authenticatedUserSelector
-  );
+  const [note, setNote] = useState<TNoteWithId>();
+  const [owner, setOwner] = useState<TUser | TAuthenticatedUser>();
 
   const output = useMemo(() => {
     if (!note) return null;
@@ -50,6 +48,7 @@ const NoteDetailPage: NextPage = () => {
     }
   }, [note]);
 
+  // TODO: Add a listener for counting the number of favorites
   useEffect(() => {
     if (!router.isReady || !authenticatedUserSelector) return;
 
@@ -68,7 +67,12 @@ const NoteDetailPage: NextPage = () => {
           if (noteDoc.exists()) {
             const noteDocData = noteDoc.data();
 
-            setNote(noteDocData);
+            const noteWithId: TNoteWithId = {
+              id: noteId as string,
+              ...noteDocData
+            };
+
+            setNote(noteWithId);
 
             // Get the owner of the note if it is not owned by the authenticated user
             const userDocRef = doc(usersCollection, noteDocData.owner);
@@ -81,6 +85,8 @@ const NoteDetailPage: NextPage = () => {
               .catch((error) => {
                 console.log('Error getting document:', error);
               });
+          } else {
+            console.log('No such document!');
           }
         })
         .catch((error) => {
@@ -94,9 +100,9 @@ const NoteDetailPage: NextPage = () => {
   return (
     <MainLayout navbarCategories={personalNotesSelector.categories}>
       <Topbar
-        noteId={noteId as string}
-        ownerUsername={owner.username}
-        isOwner={note?.owner !== undefined && note?.owner === authUser?.uid}
+        authenticatedUser={authenticatedUserSelector}
+        owner={owner ?? ({} as TUser | TAuthenticatedUser)}
+        note={note ?? ({} as TNoteWithId)}
       />
       <div className='h-full px-8 py-4 mt-12'>
         <h2 className='font-bold font-poppins text-4xl text-darker'>

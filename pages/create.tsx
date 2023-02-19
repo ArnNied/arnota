@@ -1,5 +1,5 @@
 import { useEditor } from '@tiptap/react';
-import { addDoc } from 'firebase/firestore';
+import { addDoc, Timestamp } from 'firebase/firestore';
 import { useRouter } from 'next/router';
 import { useState } from 'react';
 import { useDispatch } from 'react-redux';
@@ -31,7 +31,7 @@ const NoteCreatePage: NextPage = () => {
     e.preventDefault();
 
     const body = editor?.getJSON();
-    const now: number = Date.now();
+    const now: number = Timestamp.now().toMillis();
 
     const _note: TNote = {
       ...note,
