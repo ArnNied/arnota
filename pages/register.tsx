@@ -47,6 +47,8 @@ const RegisterPage: NextPage = () => {
   ): Promise<void> {
     e.preventDefault();
 
+    if (registrationLoading) return;
+
     if (email === '' || password === '') {
       return alert("Email or password can't be empty");
     } else if (password.length < 6) {
@@ -89,47 +91,54 @@ const RegisterPage: NextPage = () => {
   }
 
   return (
-    <div className='p-4 bg-white rounded centered'>
-      <h2 className='text-2xl text-center'>Register</h2>
-      <form onSubmit={handleSubmit} className='mt-4'>
-        <div className='space-y-2'>
-          <InputWithLabel
-            id='username'
-            label='Username'
-            value={username}
-            onChangeHandler={(e): void => setUsername(e.target.value)}
-          />
-          <InputWithLabel
-            id='email'
-            label='Email'
-            type='email'
-            value={email}
-            onChangeHandler={(e): void => setEmail(e.target.value)}
-          />
-          <InputWithLabel
-            id='password'
-            label='Password'
-            type='password'
-            placeholder='Password'
-            value={password}
-            onChangeHandler={(e): void => setPassword(e.target.value)}
-          />
-        </div>
-        <button
-          type='submit'
-          className='w-full mt-2 px-2 py-1 bg-primary bg-blend-overlay text-white rounded'
-        >
-          {registrationLoading && 'Loading...'}
-          {!registrationLoading && 'Register'}
-        </button>
-        <div className='my-2 border'></div>
-        <Link
-          href='/login'
-          className='block w-full px-2 py-1 bg-primary text-white text-center rounded'
-        >
-          Login
+    <div className='h-full flex flex-col items-center justify-center'>
+      <h1 className='w-fit p-4 font-bold text-4xl text-primary text-center'>
+        <Link href='/' className='block p-4'>
+          Arnota
         </Link>
-      </form>
+      </h1>
+      <div className='w-full max-w-[20rem] bg-white p-8 rounded shadow'>
+        <h2 className='font-semibold text-2xl text-center'>Sign Up</h2>
+        <form onSubmit={handleSubmit} className='w-full mt-4'>
+          <div className='space-y-2'>
+            <InputWithLabel
+              id='username'
+              label='Username'
+              value={username}
+              onChangeHandler={(e): void => setUsername(e.target.value)}
+            />
+            <InputWithLabel
+              id='email'
+              label='Email'
+              type='email'
+              value={email}
+              onChangeHandler={(e): void => setEmail(e.target.value)}
+            />
+            <InputWithLabel
+              id='password'
+              label='Password'
+              type='password'
+              placeholder='Password'
+              value={password}
+              onChangeHandler={(e): void => setPassword(e.target.value)}
+            />
+          </div>
+          <button
+            type='submit'
+            className='w-full mt-2 px-2 py-1 bg-primary bg-blend-overlay text-white rounded'
+          >
+            {registrationLoading && 'Loading...'}
+            {!registrationLoading && 'Sign Up'}
+          </button>
+          <div className='my-4 border'></div>
+          <p className='font-semibold'>
+            Already have an account?{' '}
+            <Link href='/login' className='text-primary'>
+              Sign In
+            </Link>
+          </p>
+        </form>
+      </div>
     </div>
   );
 };

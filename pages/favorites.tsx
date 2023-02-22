@@ -76,8 +76,8 @@ const FavoritesPage: NextPage = () => {
         </div>
         <NoteList
           notes={filteredNotes}
-          noNotesMessage="You don't have any notes"
-          noNotesSubMessage='Start writing down your ideas and thoughts'
+          noNotesMessage="You don't have any favorite notes yet"
+          noNotesSubMessage='Any note you favorite will show up here'
         />
       </div>
     </MainLayout>

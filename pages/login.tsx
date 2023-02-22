@@ -41,6 +41,8 @@ const LoginPage: NextPage = () => {
   ): Promise<void> {
     e.preventDefault();
 
+    if (signInLoading) return;
+
     const signedInUser = await signInWithEmailAndPassword(email, password);
 
     if (signedInUser) {
@@ -57,41 +59,48 @@ const LoginPage: NextPage = () => {
   }
 
   return (
-    <div className='p-4 bg-white rounded centered'>
-      <h2 className='text-2xl text-center'>Login</h2>
-      <form onSubmit={handleSubmit} className='mt-4'>
-        <div className='space-y-2'>
-          <InputWithLabel
-            id='email'
-            label='Email'
-            type='email'
-            value={email}
-            onChangeHandler={(e): void => setEmail(e.target.value)}
-          />
-          <InputWithLabel
-            id='password'
-            label='Password'
-            type='password'
-            placeholder='Password'
-            value={password}
-            onChangeHandler={(e): void => setPassword(e.target.value)}
-          />
-        </div>
-        <button
-          type='submit'
-          className='w-full mt-2 px-2 py-1 bg-primary text-white rounded'
-        >
-          {signInLoading && 'Loading...'}
-          {!signInLoading && 'Login'}
-        </button>
-        <div className='my-2 border'></div>
-        <Link
-          href='/register'
-          className='block w-full px-2 py-1 bg-primary text-white text-center rounded'
-        >
-          Register
+    <div className='h-full flex flex-col items-center justify-center'>
+      <h1 className='w-fit p-4 font-bold text-4xl text-primary text-center'>
+        <Link href='/' className='block p-4'>
+          Arnota
         </Link>
-      </form>
+      </h1>
+      <div className='w-full max-w-[20rem] bg-white p-8 rounded shadow'>
+        <h2 className='font-semibold text-2xl text-center'>Sign In</h2>
+        <form onSubmit={handleSubmit} className='w-full mt-4'>
+          <div className='space-y-2'>
+            <InputWithLabel
+              id='email'
+              label='Email'
+              type='email'
+              value={email}
+              onChangeHandler={(e): void => setEmail(e.target.value)}
+            />
+            <InputWithLabel
+              id='password'
+              label='Password'
+              type='password'
+              placeholder='Password'
+              value={password}
+              onChangeHandler={(e): void => setPassword(e.target.value)}
+            />
+          </div>
+          <button
+            type='submit'
+            className='w-full mt-2 px-2 py-1 bg-primary text-white rounded'
+          >
+            {signInLoading && 'Loading...'}
+            {!signInLoading && 'Sign In'}
+          </button>
+          <div className='my-4 border'></div>
+          <p className='font-semibold'>
+            New to Arnota?{' '}
+            <Link href='/register' className='text-primary'>
+              Create an account
+            </Link>
+          </p>
+        </form>
+      </div>
     </div>
   );
 };

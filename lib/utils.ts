@@ -18,7 +18,7 @@ export const emptyNote: TNote = {
   plainBody: '',
   category: '',
   tags: [],
-  visibility: EVisibility.PUBLIC,
+  visibility: EVisibility.PRIVATE,
   favoritedBy: [],
   lastModified: 0,
   createdAt: 0

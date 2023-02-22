@@ -66,6 +66,7 @@ export default function CreateOrEdit({
             Visibility
           </label>
           <select
+            key={note.visibility}
             id='visibility'
             name='visibility'
             className='block w-32 px-2 py-1 bg-white border-2 border-secondary focus:border-primary rounded focus:outline-none'
