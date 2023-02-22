@@ -7,7 +7,7 @@ export default function Document(): JSX.Element {
         <meta name='og:title' content='Arnota' />
         <meta
           name='description'
-          content='Capture your ideas and collaborate with others with Arnota - the powerful note-taking application that makes sharing notes simple and efficient.'
+          content='Capture your ideas quickly and easily with Arnota - The powerful note-taking application that makes taking and sharing notes simple and efficient.'
         />
         <link rel='icon' href='/favicon.ico' />
       </Head>

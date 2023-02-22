@@ -1,5 +1,9 @@
 import { useEffect, useState } from 'react';
 
+import FeatureSection from '@/components/landing/FeatureSection';
+import HeroSection from '@/components/landing/HeroSection';
+import LandingNavbar from '@/components/landing/LandingNavbar';
+import WhySection from '@/components/landing/WhySection';
 import MainLayout from '@/components/layouts/MainLayout';
 import NoteList from '@/components/note/NoteList';
 import SearchField from '@/components/shared/SearchField';
@@ -52,9 +56,14 @@ const IndexPage: NextPage = () => {
           </div>
         </MainLayout>
       ) : (
-        <div className='bg-primary'>
-          <h1>LandingPage</h1>
-        </div>
+        <>
+          <LandingNavbar />
+          <main>
+            <HeroSection />
+            <WhySection />
+            <FeatureSection />
+          </main>
+        </>
       )}
     </>
   );

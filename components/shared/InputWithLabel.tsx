@@ -44,7 +44,7 @@ export default function InputWithLabel({
         placeholder={placeholder ?? label}
         autoComplete={autoComplete ? 'on' : 'off'}
         className={clsx(
-          'block px-2 py-1 border-2 border-secondary focus:border-primary rounded focus:outline-none',
+          'block px-2 py-1 bg-white border-2 border-secondary focus:border-primary rounded focus:outline-none',
           widthClass ?? 'w-full',
           additionalInputClass
         )}
