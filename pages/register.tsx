@@ -1,8 +1,8 @@
+import { createUserWithEmailAndPassword } from '@firebase/auth';
 import { doc, setDoc } from 'firebase/firestore';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useState } from 'react';
-import { useCreateUserWithEmailAndPassword } from 'react-firebase-hooks/auth';
 
 import AuthForbiddenMixin from '@/components/mixin/AuthForbiddenMixin';
 import InputWithLabel from '@/components/shared/InputWithLabel';
@@ -19,12 +19,6 @@ const RegisterPage: NextPage = () => {
   const dispatch = useAppDispatch();
 
   const { authUser } = useInitializeState();
-  const [
-    createUserWithEmailAndPassword,
-    ,
-    registrationLoading,
-    registrationError
-  ] = useCreateUserWithEmailAndPassword(auth, { sendEmailVerification: true });
 
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
@@ -35,22 +29,21 @@ const RegisterPage: NextPage = () => {
   ): Promise<void> {
     e.preventDefault();
 
-    if (registrationLoading) return;
-
     if (email === '' || password === '') {
       return alert("Email or password can't be empty");
     } else if (password.length < 6) {
       return alert('Password must be at least 6 characters long');
     }
 
-    const registeredUser = await createUserWithEmailAndPassword(
-      email,
-      password
-    );
-
-    if (registeredUser) {
+    try {
+      const registeredUser = await createUserWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
       console.log('User created', registeredUser);
 
+      // Set user document in firestore
       try {
         const userDocRef = doc(usersCollection, registeredUser.user.uid);
 
@@ -73,8 +66,8 @@ const RegisterPage: NextPage = () => {
 
         await registeredUser.user.delete();
       }
-    } else {
-      console.log('User not created', registrationError);
+    } catch (err) {
+      console.log('Error registering user', err);
     }
   }
 
@@ -116,8 +109,7 @@ const RegisterPage: NextPage = () => {
               type='submit'
               className='w-full mt-2 px-2 py-1 bg-primary bg-blend-overlay text-white rounded'
             >
-              {registrationLoading && 'Loading...'}
-              {!registrationLoading && 'Sign Up'}
+              Sign Up
             </button>
             <div className='my-4 border'></div>
             <p className='font-semibold'>

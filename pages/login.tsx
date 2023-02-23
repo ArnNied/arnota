@@ -1,7 +1,7 @@
+import { signInWithEmailAndPassword } from 'firebase/auth';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useState } from 'react';
-import { useSignInWithEmailAndPassword } from 'react-firebase-hooks/auth';
 
 import AuthForbiddenMixin from '@/components/mixin/AuthForbiddenMixin';
 import InputWithLabel from '@/components/shared/InputWithLabel';
@@ -18,9 +18,6 @@ const LoginPage: NextPage = () => {
 
   const { authUser } = useInitializeState();
 
-  const [signInWithEmailAndPassword, , signInLoading, signInError] =
-    useSignInWithEmailAndPassword(auth);
-
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
@@ -29,20 +26,20 @@ const LoginPage: NextPage = () => {
   ): Promise<void> {
     e.preventDefault();
 
-    if (signInLoading) return;
-
-    const signedInUser = await signInWithEmailAndPassword(email, password);
-
-    if (signedInUser) {
-      console.log('User logged in', signedInUser);
+    try {
+      const signedInUser = await signInWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
 
       setAuthenticatedUserFunction(signedInUser.user, dispatch).catch((err) => {
         console.log('Error setting authenticated user', err);
       });
 
       await router.push('/');
-    } else {
-      console.log('Failed to log in', signInError);
+    } catch (err) {
+      console.log('Error signing in', err);
     }
   }
 
@@ -78,8 +75,7 @@ const LoginPage: NextPage = () => {
               type='submit'
               className='w-full mt-2 px-2 py-1 bg-primary text-white rounded'
             >
-              {signInLoading && 'Loading...'}
-              {!signInLoading && 'Sign In'}
+              Sign In
             </button>
             <div className='my-4 border'></div>
             <p className='font-semibold'>

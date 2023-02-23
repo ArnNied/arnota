@@ -1,5 +1,5 @@
-import { useEffect } from 'react';
-import { useAuthState } from 'react-firebase-hooks/auth';
+import { onAuthStateChanged } from 'firebase/auth';
+import { useEffect, useState } from 'react';
 
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 
@@ -15,24 +15,29 @@ export function useInitializeState(): {
 } {
   const dispatch = useAppDispatch();
 
-  const [authUser, loading, error] = useAuthState(auth);
-
   const personalNotesSelector = useAppSelector((state) => state.personalNotes);
 
-  useEffect(() => {
-    if (loading) return;
+  const [authUser, setAuthUser] = useState<User | null>(auth.currentUser);
 
-    if (error) {
-      console.log('Error getting authenticated user', error);
-    } else if (authUser && personalNotesSelector.hasBeenFetched === false) {
-      console.log('asd');
-      isLoggedIn(authUser, dispatch).catch((err) => {
-        console.log('Error initializing state', err);
-      });
-    }
+  useEffect(() => {
+    const authUnsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setAuthUser(user);
+
+        if (personalNotesSelector.hasBeenFetched === false) {
+          isLoggedIn(user, dispatch).catch((err) => {
+            console.log('Error initializing state', err);
+          });
+        }
+      } else {
+        setAuthUser(null);
+      }
+    });
+
+    return () => authUnsubscribe();
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [authUser, loading, error, personalNotesSelector]);
+  }, [personalNotesSelector]);
 
   return { authUser, personalNotesSelector };
 }

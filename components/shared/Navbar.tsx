@@ -1,8 +1,8 @@
 import 'simplebar-react/dist/simplebar.min.css';
 
+import { signOut } from 'firebase/auth';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { useSignOut } from 'react-firebase-hooks/auth';
 import SimpleBar from 'simplebar-react';
 import slugify from 'slugify';
 
@@ -22,18 +22,16 @@ export default function Navbar({ categories }: NavbarProps): JSX.Element {
   const router = useRouter();
   const dispatch = useAppDispatch();
 
-  const [signOut, , error] = useSignOut(auth);
-
   async function handleLogout(): Promise<void> {
-    const success = await signOut();
+    try {
+      await signOut(auth);
 
-    if (success) {
       dispatch(clearFavorites());
       dispatch(clearPersonalNotes());
       dispatch(clearAuthenticatedUser());
 
       await router.push('/');
-    } else {
+    } catch (error) {
       console.log('Failed to log out', error);
     }
   }
