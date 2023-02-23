@@ -10,7 +10,7 @@ import { notesCollection } from '@/lib/firebase/firestore';
 import { useInitializeState } from '@/lib/hooks';
 import { configuredEditor } from '@/lib/tiptap';
 import { emptyNote } from '@/lib/utils';
-import { updateNote } from '@/store/slices/personalNotesSlice';
+import { updatePersonalNote } from '@/store/slices/personalNotesSlice';
 
 import type { TNoteWithId, TNote } from '@/types/note';
 import type { Content } from '@tiptap/react';
@@ -77,7 +77,7 @@ const NoteEditPage: NextPage = () => {
           ...note
         };
 
-        dispatch(updateNote(noteWithId));
+        dispatch(updatePersonalNote(noteWithId));
 
         await router.push(`/nota/${noteDocRef.id}`);
       })

@@ -1,7 +1,7 @@
 import { doc, getDoc, getDocs, query, where } from 'firebase/firestore';
 
 import { setAuthenticatedUser } from '@/store/slices/authenticatedUserSlice';
-import { setNotes } from '@/store/slices/personalNotesSlice';
+import { setPersonalNotes } from '@/store/slices/personalNotesSlice';
 import { EVisibility } from '@/types/note';
 
 import { notesCollection, usersCollection } from './firebase/firestore';
@@ -44,7 +44,7 @@ export async function isLoggedIn(
     });
   });
 
-  dispatcher(setNotes(temp));
+  dispatcher(setPersonalNotes(temp));
 }
 
 // Set the authenticated user in the store

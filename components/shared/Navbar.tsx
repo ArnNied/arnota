@@ -1,11 +1,16 @@
+import 'simplebar-react/dist/simplebar.min.css';
+
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useSignOut } from 'react-firebase-hooks/auth';
+import SimpleBar from 'simplebar-react';
 import slugify from 'slugify';
 
 import { auth } from '@/lib/firebase/core';
 import { useAppDispatch } from '@/store/hooks';
 import { clearAuthenticatedUser } from '@/store/slices/authenticatedUserSlice';
+import { clearFavorites } from '@/store/slices/favoritedNotesSlice';
+import { clearPersonalNotes } from '@/store/slices/personalNotesSlice';
 
 import NavbarLink from './NavbarLink';
 
@@ -23,6 +28,8 @@ export default function Navbar({ categories }: NavbarProps): JSX.Element {
     const success = await signOut();
 
     if (success) {
+      dispatch(clearFavorites());
+      dispatch(clearPersonalNotes());
       dispatch(clearAuthenticatedUser());
 
       await router.push('/');
@@ -32,28 +39,30 @@ export default function Navbar({ categories }: NavbarProps): JSX.Element {
   }
 
   return (
-    <nav className='w-1/5 flex flex-col h-screen bg-primary fixed'>
+    <nav className='w-1/5 h-screen flex flex-col bg-primary fixed'>
       <Link href='/'>
         <h1 className='w-full py-4 font-bold text-4xl text-light text-center'>
           ARNOTA
         </h1>
       </Link>
-      <div className='grow flex flex-col mx-4'>
-        <div>
+      <div className='h-full min-h-0 flex flex-col mx-4'>
+        <div className=''>
           <NavbarLink href='/' text='Home' />
           <NavbarLink href='/create' text='New Note' />
           <NavbarLink href='/browse' text='Browse' />
           <NavbarLink href='/favorites' text='Favorites' />
         </div>
         {categories && categories.length !== 0 && (
-          <div className='my-4 overflow-y-auto'>
-            {categories.map((category) => (
-              <NavbarLink
-                key={category}
-                href={`/category/${slugify(category)}`}
-                text={category}
-              />
-            ))}
+          <div className='h-full min-h-0 my-4'>
+            <SimpleBar className='h-full'>
+              {categories.map((category) => (
+                <NavbarLink
+                  key={category}
+                  href={`/category/${slugify(category)}`}
+                  text={category}
+                />
+              ))}
+            </SimpleBar>
           </div>
         )}
         <div className='mt-auto mb-4 pt-4 border-t space-y-1'>

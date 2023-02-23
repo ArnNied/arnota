@@ -20,7 +20,6 @@ export const authenticatedUserSlice = createSlice({
     ) => {
       return action.payload;
     },
-    clearAuthenticatedUser: () => initialState,
     updateAuthenticatedUser: (
       state,
       action: PayloadAction<TAuthenticatedUser>
@@ -29,14 +28,15 @@ export const authenticatedUserSlice = createSlice({
         ...state,
         ...action.payload
       };
-    }
+    },
+    clearAuthenticatedUser: () => initialState
   }
 });
 
 export const {
   setAuthenticatedUser,
-  clearAuthenticatedUser,
-  updateAuthenticatedUser
+  updateAuthenticatedUser,
+  clearAuthenticatedUser
 } = authenticatedUserSlice.actions;
 
 export default authenticatedUserSlice.reducer;

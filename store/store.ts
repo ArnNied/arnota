@@ -1,8 +1,8 @@
 import { configureStore } from '@reduxjs/toolkit';
 
 import authenticatedUserReducer from './slices/authenticatedUserSlice';
-import personalNotesReducer from './slices/personalNotesSlice';
 import favoritedNotesReducer from './slices/favoritedNotesSlice';
+import personalNotesReducer from './slices/personalNotesSlice';
 
 export const store = configureStore({
   reducer: {

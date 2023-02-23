@@ -1,7 +1,6 @@
 import { createSlice } from '@reduxjs/toolkit';
 
 import type { TNoteWithId } from '@/types/note';
-import type { PersonalNotesSliceInitialState } from '@/types/slice';
 import type { PayloadAction } from '@reduxjs/toolkit';
 
 type TInitialState = {
@@ -47,10 +46,12 @@ export const noteSlice = createSlice({
       if (index !== -1) {
         state.notes.splice(index, 1);
       }
-    }
+    },
+    clearFavorites: () => initialState
   }
 });
 
-export const { setFavorites, addFavorite, deleteFavorite } = noteSlice.actions;
+export const { setFavorites, addFavorite, deleteFavorite, clearFavorites } =
+  noteSlice.actions;
 
 export default noteSlice.reducer;

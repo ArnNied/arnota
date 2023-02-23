@@ -18,18 +18,18 @@ const initialState: PersonalNotesSliceInitialState = {
   hasBeenFetched: false
 };
 
-export const noteSlice = createSlice({
+export const personalNotesSlice = createSlice({
   name: 'personalNotes',
   initialState: initialState,
   reducers: {
-    setNotes: (_state, action: PayloadAction<TNoteWithId[]>) => {
+    setPersonalNotes: (_state, action: PayloadAction<TNoteWithId[]>) => {
       return {
         notes: action.payload,
         categories: action.payload.reduce(setCategories, [] as string[]),
         hasBeenFetched: true
       };
     },
-    addNote: (state, action: PayloadAction<TNoteWithId>) => {
+    addPersonalNote: (state, action: PayloadAction<TNoteWithId>) => {
       const index = state.notes.findIndex(
         (note) => note.id === action.payload.id
       );
@@ -38,7 +38,7 @@ export const noteSlice = createSlice({
         state.categories = state.notes.reduce(setCategories, [] as string[]);
       }
     },
-    updateNote: (state, action: PayloadAction<TNoteWithId>) => {
+    updatePersonalNote: (state, action: PayloadAction<TNoteWithId>) => {
       const index = state.notes.findIndex(
         (note) => note.id === action.payload.id
       );
@@ -47,16 +47,23 @@ export const noteSlice = createSlice({
         state.categories = state.notes.reduce(setCategories, [] as string[]);
       }
     },
-    deleteNote: (state, action: PayloadAction<string>) => {
+    deletePersonalNote: (state, action: PayloadAction<string>) => {
       const index = state.notes.findIndex((note) => note.id === action.payload);
       if (index !== -1) {
         state.notes.splice(index, 1);
         state.categories = state.notes.reduce(setCategories, [] as string[]);
       }
-    }
+    },
+    clearPersonalNotes: () => ({ ...initialState })
   }
 });
 
-export const { setNotes, addNote, updateNote, deleteNote } = noteSlice.actions;
+export const {
+  setPersonalNotes,
+  addPersonalNote,
+  updatePersonalNote,
+  deletePersonalNote,
+  clearPersonalNotes
+} = personalNotesSlice.actions;
 
-export default noteSlice.reducer;
+export default personalNotesSlice.reducer;

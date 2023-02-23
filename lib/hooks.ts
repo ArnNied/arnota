@@ -1,4 +1,3 @@
-import { getAuth } from 'firebase/auth';
 import { useEffect } from 'react';
 import { useAuthState } from 'react-firebase-hooks/auth';
 
@@ -26,6 +25,7 @@ export function useInitializeState(): {
     if (error) {
       console.log('Error getting authenticated user', error);
     } else if (authUser && personalNotesSelector.hasBeenFetched === false) {
+      console.log('asd');
       isLoggedIn(authUser, dispatch).catch((err) => {
         console.log('Error initializing state', err);
       });

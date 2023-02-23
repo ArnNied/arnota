@@ -24,7 +24,10 @@ import {
   addFavorite,
   deleteFavorite
 } from '@/store/slices/favoritedNotesSlice';
-import { addNote, deleteNote } from '@/store/slices/personalNotesSlice';
+import {
+  addPersonalNote,
+  deletePersonalNote
+} from '@/store/slices/personalNotesSlice';
 
 import TopbarAction from './TopbarAction';
 
@@ -71,7 +74,7 @@ export default function Topbar({
         .then(async () => {
           console.log('Note deleted');
 
-          dispatch(deleteNote(note?.id as string));
+          dispatch(deletePersonalNote(note?.id as string));
 
           await router.push('/');
         })
@@ -138,7 +141,7 @@ export default function Topbar({
         const newDocRef = await addDoc(notesCollection, duplicateNote);
 
         if (newDocRef.id) {
-          dispatch(addNote({ id: newDocRef.id, ...duplicateNote }));
+          dispatch(addPersonalNote({ id: newDocRef.id, ...duplicateNote }));
 
           await router.push(`/nota/${newDocRef.id}`);
         }
