@@ -1,9 +1,10 @@
 import { doc, setDoc } from 'firebase/firestore';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useCreateUserWithEmailAndPassword } from 'react-firebase-hooks/auth';
 
+import AuthForbiddenMixin from '@/components/mixin/AuthForbiddenMixin';
 import InputWithLabel from '@/components/shared/InputWithLabel';
 import { auth } from '@/lib/firebase/core';
 import { usersCollection } from '@/lib/firebase/firestore';
@@ -28,19 +29,6 @@ const RegisterPage: NextPage = () => {
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-
-  // If user is already logged in, redirect to home page
-  useEffect(() => {
-    if (authUser === undefined || !router.isReady) return;
-
-    if (authUser) {
-      router
-        .push('/')
-        .then(() => console.log('User already logged in'))
-        .catch((err) => console.log('Error redirecting', err));
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [authUser, router.isReady]);
 
   async function handleSubmit(
     e: React.FormEvent<HTMLFormElement>
@@ -91,55 +79,57 @@ const RegisterPage: NextPage = () => {
   }
 
   return (
-    <div className='h-full flex flex-col items-center justify-center'>
-      <h1 className='w-fit p-4 font-bold text-4xl text-primary text-center'>
-        <Link href='/' className='block p-4'>
-          Arnota
-        </Link>
-      </h1>
-      <div className='w-full max-w-[20rem] bg-white p-8 rounded shadow'>
-        <h2 className='font-semibold text-2xl text-center'>Sign Up</h2>
-        <form onSubmit={handleSubmit} className='w-full mt-4'>
-          <div className='space-y-2'>
-            <InputWithLabel
-              id='username'
-              label='Username'
-              value={username}
-              onChangeHandler={(e): void => setUsername(e.target.value)}
-            />
-            <InputWithLabel
-              id='email'
-              label='Email'
-              type='email'
-              value={email}
-              onChangeHandler={(e): void => setEmail(e.target.value)}
-            />
-            <InputWithLabel
-              id='password'
-              label='Password'
-              type='password'
-              placeholder='Password'
-              value={password}
-              onChangeHandler={(e): void => setPassword(e.target.value)}
-            />
-          </div>
-          <button
-            type='submit'
-            className='w-full mt-2 px-2 py-1 bg-primary bg-blend-overlay text-white rounded'
-          >
-            {registrationLoading && 'Loading...'}
-            {!registrationLoading && 'Sign Up'}
-          </button>
-          <div className='my-4 border'></div>
-          <p className='font-semibold'>
-            Already have an account?{' '}
-            <Link href='/login' className='text-primary'>
-              Sign In
-            </Link>
-          </p>
-        </form>
+    <AuthForbiddenMixin authUser={authUser} router={router}>
+      <div className='h-full flex flex-col items-center justify-center'>
+        <h1 className='w-fit p-4 font-bold text-4xl text-primary text-center'>
+          <Link href='/' className='block p-4'>
+            Arnota
+          </Link>
+        </h1>
+        <div className='w-full max-w-[20rem] bg-white p-8 rounded shadow'>
+          <h2 className='font-semibold text-2xl text-center'>Sign Up</h2>
+          <form onSubmit={handleSubmit} className='w-full mt-4'>
+            <div className='space-y-2'>
+              <InputWithLabel
+                id='username'
+                label='Username'
+                value={username}
+                onChangeHandler={(e): void => setUsername(e.target.value)}
+              />
+              <InputWithLabel
+                id='email'
+                label='Email'
+                type='email'
+                value={email}
+                onChangeHandler={(e): void => setEmail(e.target.value)}
+              />
+              <InputWithLabel
+                id='password'
+                label='Password'
+                type='password'
+                placeholder='Password'
+                value={password}
+                onChangeHandler={(e): void => setPassword(e.target.value)}
+              />
+            </div>
+            <button
+              type='submit'
+              className='w-full mt-2 px-2 py-1 bg-primary bg-blend-overlay text-white rounded'
+            >
+              {registrationLoading && 'Loading...'}
+              {!registrationLoading && 'Sign Up'}
+            </button>
+            <div className='my-4 border'></div>
+            <p className='font-semibold'>
+              Already have an account?{' '}
+              <Link href='/login' className='text-primary'>
+                Sign In
+              </Link>
+            </p>
+          </form>
+        </div>
       </div>
-    </div>
+    </AuthForbiddenMixin>
   );
 };
 

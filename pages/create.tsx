@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { useDispatch } from 'react-redux';
 
 import MainLayout from '@/components/layouts/MainLayout';
+import AuthRequiredMixin from '@/components/mixin/AuthRequiredMixin';
 import CreateOrEdit from '@/components/note/CreateOrEdit';
 import { notesCollection } from '@/lib/firebase/firestore';
 import { useInitializeState } from '@/lib/hooks';
@@ -59,14 +60,16 @@ const NoteCreatePage: NextPage = () => {
   }
 
   return (
-    <MainLayout navbarCategories={personalNotesSelector.categories}>
-      <CreateOrEdit
-        note={note}
-        editor={editor}
-        setNoteHandler={setNote}
-        submitHandler={handleSubmit}
-      />
-    </MainLayout>
+    <AuthRequiredMixin authUser={authUser} router={router}>
+      <MainLayout navbarCategories={personalNotesSelector.categories}>
+        <CreateOrEdit
+          note={note}
+          editor={editor}
+          setNoteHandler={setNote}
+          submitHandler={handleSubmit}
+        />
+      </MainLayout>
+    </AuthRequiredMixin>
   );
 };
 
