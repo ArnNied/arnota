@@ -20,7 +20,7 @@ export default function CreateOrEdit({
   submitHandler
 }: SearchOrEditProps): JSX.Element {
   return (
-    <div className='h-full px-4 py-4'>
+    <div className='px-4 py-4'>
       <h2 className='font-bold text-3xl text-darker'>
         Start capturing your ideas
       </h2>

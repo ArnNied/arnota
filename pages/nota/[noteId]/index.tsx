@@ -104,7 +104,7 @@ const NoteDetailPage: NextPage = () => {
         owner={owner ?? ({} as TUser | TAuthenticatedUser)}
         note={note ?? ({} as TNoteWithId)}
       />
-      <div className='h-full px-8 py-4 mt-12'>
+      <div className='px-8 py-4 mt-12'>
         <h2 className='font-bold font-poppins text-4xl text-darker'>
           {note?.title}
         </h2>

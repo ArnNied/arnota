@@ -6,12 +6,12 @@
 
 html,
 body {
-  height: 100%;
+  position: relative;
   scroll-behavior: smooth !important;
 }
 
 #__next {
-  height: 100%;
+  position: relative;
 }
 
 .centered {

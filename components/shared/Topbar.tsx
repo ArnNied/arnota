@@ -71,12 +71,12 @@ export default function Topbar({
       const noteDocRef = doc(notesCollection, note?.id);
 
       deleteDoc(noteDocRef)
-        .then(async () => {
+        .then(() => {
           console.log('Note deleted');
 
           dispatch(deletePersonalNote(note?.id as string));
 
-          await router.push('/');
+          router.push('/').catch((err) => console.log(err));
         })
         .catch((err) => {
           console.log('Error deleting note', err);

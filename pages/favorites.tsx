@@ -71,7 +71,10 @@ const FavoritesPage: NextPage = () => {
 
   return (
     <AuthRequiredMixin authUser={authUser} router={router}>
-      <MainLayout navbarCategories={personalNotesSelector.categories}>
+      <MainLayout
+        navbarCategories={personalNotesSelector.categories}
+        fillScreen={favoritedNotesSelector.notes.length === 0}
+      >
         <div className='h-full px-4 py-4'>
           <div className='pb-4 border-b border-secondary'>
             <SearchField

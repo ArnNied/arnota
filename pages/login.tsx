@@ -45,7 +45,7 @@ const LoginPage: NextPage = () => {
 
   return (
     <AuthForbiddenMixin authUser={authUser} router={router}>
-      <div className='h-full flex flex-col items-center justify-center'>
+      <div className='h-screen flex flex-col items-center justify-center'>
         <h1 className='w-fit p-4 font-bold text-4xl text-primary text-center'>
           <Link href='/' className='block p-4'>
             Arnota
