@@ -16,7 +16,8 @@ import type { NextPage } from 'next';
 const FavoritesPage: NextPage = () => {
   const router = useRouter();
 
-  const { authUser, personalNotesSelector } = useInitializeState();
+  const { authUserLoading, authUser, personalNotesSelector } =
+    useInitializeState();
 
   const favoritedNotesSelector = useAppSelector(
     (state) => state.favoritedNotes
@@ -70,7 +71,11 @@ const FavoritesPage: NextPage = () => {
   }, [search, favoritedNotesSelector]);
 
   return (
-    <AuthRequiredMixin authUser={authUser} router={router}>
+    <AuthRequiredMixin
+      authUserLoading={authUserLoading}
+      authUser={authUser}
+      router={router}
+    >
       <MainLayout
         navbarCategories={personalNotesSelector.categories}
         fillScreen={favoritedNotesSelector.notes.length === 0}

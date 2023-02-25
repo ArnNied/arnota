@@ -16,7 +16,7 @@ const LoginPage: NextPage = () => {
   const router = useRouter();
   const dispatch = useAppDispatch();
 
-  const { authUser } = useInitializeState();
+  const { authUserLoading, authUser } = useInitializeState();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -44,7 +44,11 @@ const LoginPage: NextPage = () => {
   }
 
   return (
-    <AuthForbiddenMixin authUser={authUser} router={router}>
+    <AuthForbiddenMixin
+      authUserLoading={authUserLoading}
+      authUser={authUser}
+      router={router}
+    >
       <div className='h-screen flex flex-col items-center justify-center'>
         <h1 className='w-fit p-4 font-bold text-4xl text-primary text-center'>
           <Link href='/' className='block p-4'>

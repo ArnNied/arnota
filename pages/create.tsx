@@ -20,7 +20,8 @@ const NoteCreatePage: NextPage = () => {
   const router = useRouter();
   const dispatch = useDispatch();
 
-  const { authUser, personalNotesSelector } = useInitializeState();
+  const { authUserLoading, authUser, personalNotesSelector } =
+    useInitializeState();
 
   const [note, setNote] = useState<TNote>(emptyNote);
 
@@ -56,7 +57,11 @@ const NoteCreatePage: NextPage = () => {
   }
 
   return (
-    <AuthRequiredMixin authUser={authUser} router={router}>
+    <AuthRequiredMixin
+      authUserLoading={authUserLoading}
+      authUser={authUser}
+      router={router}
+    >
       <MainLayout navbarCategories={personalNotesSelector.categories}>
         <CreateOrEdit
           note={note}

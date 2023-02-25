@@ -5,17 +5,22 @@ import type { NextRouter } from 'next/router';
 
 type AuthRequiredMixinProps = {
   children: JSX.Element | JSX.Element[];
+  authUserLoading: boolean;
   authUser: User | null | undefined;
   router: NextRouter;
 };
 
 export default function AuthRequiredMixin({
   children,
+  authUserLoading,
   authUser,
   router
 }: AuthRequiredMixinProps): JSX.Element {
   useEffect(() => {
-    if (!router.isReady) return;
+    console.log('1');
+    if (authUserLoading || !router.isReady) return;
+
+    console.log('2');
 
     if (authUser === null) {
       router
@@ -24,7 +29,7 @@ export default function AuthRequiredMixin({
         .catch((err) => console.log('Error redirecting', err));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [authUser, router.isReady]);
+  }, [authUserLoading, authUser, router.isReady]);
 
   return <>{children}</>;
 }

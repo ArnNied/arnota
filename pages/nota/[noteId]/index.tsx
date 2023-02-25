@@ -137,14 +137,12 @@ const NoteDetailPage: NextPage = () => {
   }
 
   async function handleShare(): Promise<void> {
-    // TODO: Implement UI popup for sharing
     await navigator.clipboard.writeText(window.location.href);
 
     alert("Note's link copied to clipboard");
   }
 
   async function handleDuplicate(): Promise<void> {
-    // TODO: Implement UI popup for duplicating a note
     const confirmed = confirm('Duplicate the note and add it to your notes?');
 
     if (confirmed) {

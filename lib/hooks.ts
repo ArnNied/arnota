@@ -10,6 +10,7 @@ import type { PersonalNotesSliceInitialState } from '@/types/slice';
 import type { User } from 'firebase/auth';
 
 export function useInitializeState(): {
+  authUserLoading: boolean;
   authUser: User | null | undefined;
   personalNotesSelector: PersonalNotesSliceInitialState;
 } {
@@ -17,6 +18,7 @@ export function useInitializeState(): {
 
   const personalNotesSelector = useAppSelector((state) => state.personalNotes);
 
+  const [authUserLoading, setauthUserLoading] = useState(true);
   const [authUser, setAuthUser] = useState<User | null>(auth.currentUser);
 
   useEffect(() => {
@@ -32,6 +34,8 @@ export function useInitializeState(): {
       } else {
         setAuthUser(null);
       }
+
+      setauthUserLoading(false);
     });
 
     return () => authUnsubscribe();
@@ -39,5 +43,5 @@ export function useInitializeState(): {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [personalNotesSelector]);
 
-  return { authUser, personalNotesSelector };
+  return { authUserLoading, authUser, personalNotesSelector };
 }

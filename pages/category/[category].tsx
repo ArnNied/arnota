@@ -15,7 +15,8 @@ const CategoryPage: NextPage = () => {
 
   const { category } = router.query;
 
-  const { authUser, personalNotesSelector } = useInitializeState();
+  const { authUserLoading, authUser, personalNotesSelector } =
+    useInitializeState();
 
   const [search, setSearch] = useState<string>('');
   const [filteredNotes, setFilteredNotes] = useState<TNoteWithId[]>([]);
@@ -43,7 +44,11 @@ const CategoryPage: NextPage = () => {
   }, [personalNotesSelector, category, search]);
 
   return (
-    <AuthRequiredMixin authUser={authUser} router={router}>
+    <AuthRequiredMixin
+      authUserLoading={authUserLoading}
+      authUser={authUser}
+      router={router}
+    >
       <MainLayout
         navbarCategories={personalNotesSelector.categories}
         fillScreen={filteredNotes.length === 0}

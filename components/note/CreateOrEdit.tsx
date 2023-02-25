@@ -4,7 +4,6 @@ import { HiOutlineChevronDown } from 'react-icons/hi';
 
 import { ENoteVisibility } from '@/types/note';
 
-import InputWithLabel from '../shared/InputWithLabel';
 import Topbar from '../shared/Topbar';
 import Tiptap from '../tiptap/Tiptap';
 
