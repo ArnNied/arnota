@@ -35,7 +35,7 @@ export const configuredExtension = [
   CustomStarterKit,
   CustomHeading,
   Placeholder.configure({
-    placeholder: 'Record your ideas here'
+    placeholder: 'Body: Record your ideas here'
   })
 ];
 

@@ -2,7 +2,7 @@ import { doc, getDoc, getDocs, query, where } from 'firebase/firestore';
 
 import { setAuthenticatedUser } from '@/store/slices/authenticatedUserSlice';
 import { setPersonalNotes } from '@/store/slices/personalNotesSlice';
-import { EVisibility } from '@/types/note';
+import { ENoteVisibility } from '@/types/note';
 
 import { notesCollection, usersCollection } from './firebase/firestore';
 
@@ -18,7 +18,7 @@ export const emptyNote: TNote = {
   plainBody: '',
   category: '',
   tags: [],
-  visibility: EVisibility.PRIVATE,
+  visibility: ENoteVisibility.PRIVATE,
   favoritedBy: [],
   lastModified: 0,
   createdAt: 0

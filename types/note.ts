@@ -1,6 +1,6 @@
-export enum EVisibility {
+export enum ENoteVisibility {
   PUBLIC = 'PUBLIC',
-  UNLISTED = 'UNLISTED',
+  LIMITED = 'LIMITED',
   PRIVATE = 'PRIVATE'
 }
 
@@ -10,7 +10,7 @@ export type TNote = {
   body: string;
   plainBody: string;
   category: string;
-  visibility: EVisibility;
+  visibility: ENoteVisibility;
   tags: string[];
   favoritedBy: string[];
   createdAt: number;

@@ -57,9 +57,7 @@ const NoteEditPage: NextPage = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [router.isReady, personalNotesSelector, editor]);
 
-  function handleSubmit(e: React.FormEvent<HTMLFormElement>): void {
-    e.preventDefault();
-
+  async function handleSubmit(): Promise<void> {
     const body = editor?.getJSON();
     const now: number = Timestamp.now().toMillis();
 
@@ -70,20 +68,21 @@ const NoteEditPage: NextPage = () => {
     };
 
     const noteDocRef = doc(notesCollection, noteId as string);
-    updateDoc(noteDocRef, note)
-      .then(async () => {
-        const noteWithId: TNoteWithId = {
-          id: noteId as string,
-          ...note
-        };
 
-        dispatch(updatePersonalNote(noteWithId));
+    try {
+      await updateDoc(noteDocRef, note);
 
-        await router.push(`/nota/${noteDocRef.id}`);
-      })
-      .catch((error) => {
-        console.log('Error in NoteEditPage handleSubmit', error);
-      });
+      const noteWithId: TNoteWithId = {
+        id: noteId as string,
+        ...note
+      };
+
+      dispatch(updatePersonalNote(noteWithId));
+
+      await router.push(`/nota/${noteDocRef.id}`);
+    } catch (error) {
+      console.log('Error in NoteEditPage handleSubmit', error);
+    }
   }
 
   return (

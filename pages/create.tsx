@@ -26,11 +26,7 @@ const NoteCreatePage: NextPage = () => {
 
   const editor = useEditor(configuredEditor);
 
-  async function handleSubmit(
-    e: React.FormEvent<HTMLFormElement>
-  ): Promise<void> {
-    e.preventDefault();
-
+  async function handleSubmit(): Promise<void> {
     const body = editor?.getJSON();
     const now: number = Timestamp.now().toMillis();
 

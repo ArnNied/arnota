@@ -14,9 +14,9 @@ export default function Tiptap({ editor }: TiptapProps): JSX.Element {
   return (
     <div
       id='tiptap-editor-container'
-      className='w-full bg-white border-2 border-secondary rounded'
+      className='w-full border-2 border-secondary rounded'
     >
-      <div className='flex flex-row p-1'>
+      <div className='flex flex-row p-1 bg-white sticky top-12 z-10'>
         <TiptapExtensionButton
           Icon={AiOutlineBold}
           isActive={editor?.isActive('bold')}

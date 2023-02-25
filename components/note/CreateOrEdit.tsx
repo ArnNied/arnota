@@ -1,16 +1,31 @@
-import { EVisibility } from '@/types/note';
+import { Listbox } from '@headlessui/react';
+import { AiFillEye, AiOutlineEye, AiOutlineEyeInvisible } from 'react-icons/ai';
+import { HiOutlineChevronDown } from 'react-icons/hi';
+
+import { ENoteVisibility } from '@/types/note';
 
 import InputWithLabel from '../shared/InputWithLabel';
+import Topbar from '../shared/Topbar';
 import Tiptap from '../tiptap/Tiptap';
 
 import type { TNote } from '@/types/note';
 import type { useEditor } from '@tiptap/react';
 
+export const NoteVisibilityIconMap = {
+  [ENoteVisibility.PUBLIC]: <AiFillEye size='1.25em' className='fill-darker' />,
+  [ENoteVisibility.LIMITED]: (
+    <AiOutlineEye size='1.25em' className='fill-darker' />
+  ),
+  [ENoteVisibility.PRIVATE]: (
+    <AiOutlineEyeInvisible size='1.25em' className='fill-darker' />
+  )
+};
+
 type SearchOrEditProps = {
   note: TNote;
   editor: ReturnType<typeof useEditor>;
   setNoteHandler: (note: TNote) => void;
-  submitHandler: (e: React.FormEvent<HTMLFormElement>) => void;
+  submitHandler: () => void;
 };
 
 export default function CreateOrEdit({
@@ -20,79 +35,86 @@ export default function CreateOrEdit({
   submitHandler
 }: SearchOrEditProps): JSX.Element {
   return (
-    <div className='px-4 py-4'>
-      <h2 className='font-bold text-3xl text-darker'>
-        Start capturing your ideas
-      </h2>
-      <form onSubmit={submitHandler} className='mt-4 space-y-2'>
-        <InputWithLabel
-          id='title'
-          label='Title'
-          placeholder='Your Captivating Title'
-          additionalLabelClass='font-semibold text-lg'
-          additionalInputClass='font-semibold text-lg'
+    <>
+      <Topbar
+        right={
+          <>
+            <Listbox value={note.visibility}>
+              <div>
+                <Listbox.Button className='w-32 flex flex-row items-center justify-between p-1 text-start rounded'>
+                  <div className='flex flex-row items-center'>
+                    <span className='mr-1'>
+                      {NoteVisibilityIconMap[note.visibility]}
+                    </span>{' '}
+                    {note.visibility}
+                  </div>
+                  <HiOutlineChevronDown size='1.25em' className='fill' />
+                </Listbox.Button>
+                <Listbox.Options as='div' className='absolute mt-1'>
+                  {Object.values(ENoteVisibility).map((visibility) => (
+                    <Listbox.Option
+                      as='button'
+                      key={visibility}
+                      value={visibility}
+                      onClick={(): void =>
+                        setNoteHandler({ ...note, visibility: visibility })
+                      }
+                      className='flex flex-row bg-white rounded'
+                    >
+                      <div className='w-32 flex flex-row items-center p-1 hover:bg-primary/30 text-start'>
+                        <span className='mr-1'>
+                          {NoteVisibilityIconMap[visibility]}
+                        </span>{' '}
+                        {visibility}
+                      </div>
+                    </Listbox.Option>
+                  ))}
+                </Listbox.Options>
+              </div>
+            </Listbox>
+            <button
+              type='button'
+              onClick={submitHandler}
+              className='px-6 py-1 bg-primary font- text-light rounded'
+            >
+              SAVE
+            </button>
+          </>
+        }
+      />
+
+      <div className='p-8 mt-12 space-y-4'>
+        <input
+          type='text'
+          placeholder='Title: Your Captivating Title'
+          className='w-full py-1 bg-light font-bold text-2xl text-darker border-b-2 border-secondary focus:border-primary focus:outline-none'
           value={note.title}
-          onChangeHandler={(e): void =>
+          onChange={(e): void =>
             setNoteHandler({ ...note, title: e.target.value })
           }
         />
-        <div className='space-y-1'>
-          <label className='font-semibold text-lg text-darker'>Body</label>
-          <Tiptap editor={editor} />
+        <div className='flex flex-row space-x-4'>
+          <input
+            type='text'
+            placeholder='Category (optional)'
+            className='w-72 py-1 bg-light text-darker border-b-2 border-secondary focus:border-primary focus:outline-none'
+            value={note.category}
+            onChange={(e): void =>
+              setNoteHandler({ ...note, category: e.target.value })
+            }
+          />
+          <input
+            type='text'
+            placeholder='Tags (optional, separate with comma)'
+            className='w-full py-1 bg-light text-darker border-b-2 border-secondary focus:border-primary focus:outline-none'
+            value={note.tags.map((tag) => tag.trim()).join(', ')}
+            onChange={(e): void =>
+              setNoteHandler({ ...note, tags: e.target.value.split(', ') })
+            }
+          />
         </div>
-        <InputWithLabel
-          id='category'
-          label='Category'
-          hint='(optional)'
-          placeholder='Categorize your note for easy search'
-          widthClass='w-72'
-          value={note.category}
-          onChangeHandler={(e): void =>
-            setNoteHandler({ ...note, category: e.target.value })
-          }
-        />
-        <InputWithLabel
-          id='tags'
-          label='Tags'
-          hint='(optional, separate with comma)'
-          placeholder='Organize them further with multiple tags for composite search'
-          value={note.tags.map((tag) => tag.trim()).join(', ')}
-          onChangeHandler={(e): void =>
-            setNoteHandler({ ...note, tags: e.target.value.split(', ') })
-          }
-        />
-        <div className='space-y-1'>
-          <label htmlFor='visibility' className='text-darker'>
-            Visibility
-          </label>
-          <select
-            key={note.visibility}
-            id='visibility'
-            name='visibility'
-            className='block w-32 px-2 py-1 bg-white border-2 border-secondary focus:border-primary rounded focus:outline-none'
-            defaultValue={note.visibility}
-          >
-            {Object.values(EVisibility).map((visibility) => (
-              <option
-                key={visibility}
-                value={visibility}
-                onClick={(): void =>
-                  setNoteHandler({ ...note, visibility: visibility })
-                }
-              >
-                {visibility}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <button
-          type='submit'
-          className='mt-2 px-2 py-1 bg-primary text-light rounded'
-        >
-          Save
-        </button>
-      </form>
-    </div>
+        <Tiptap editor={editor} />
+      </div>
+    </>
   );
 }
