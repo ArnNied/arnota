@@ -1,44 +1,23 @@
 import { generateHTML } from '@tiptap/core';
 import DOMPurify from 'dompurify';
-import {
-  addDoc,
-  arrayRemove,
-  arrayUnion,
-  deleteDoc,
-  doc,
-  getDoc,
-  Timestamp,
-  updateDoc
-} from 'firebase/firestore';
+import { doc, getDoc } from 'firebase/firestore';
 import parse from 'html-react-parser';
 import { useRouter } from 'next/router';
 import { useEffect, useMemo, useState } from 'react';
-import {
-  AiFillEdit,
-  AiFillDelete,
-  AiFillHeart,
-  AiOutlineHeart,
-  AiFillCopy
-} from 'react-icons/ai';
-import { HiShare } from 'react-icons/hi';
+import { AiOutlineInfoCircle } from 'react-icons/ai';
 
 import MainLayout from '@/components/layouts/MainLayout';
+import NoteActionModal from '@/components/note/NoteActionModal';
+import NoteTopbarIsNotOwner from '@/components/note/NoteTopbarIsNotOwner';
+import NoteTopbarIsOwner from '@/components/note/NoteTopbarIsOwner';
 import Topbar from '@/components/shared/Topbar';
 import TopbarAction from '@/components/shared/TopbarAction';
 import { notesCollection, usersCollection } from '@/lib/firebase/firestore';
 import { useInitializeState } from '@/lib/hooks';
 import { configuredExtension } from '@/lib/tiptap';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
-import {
-  deleteFavorite,
-  addFavorite
-} from '@/store/slices/favoritedNotesSlice';
-import {
-  deletePersonalNote,
-  addPersonalNote
-} from '@/store/slices/personalNotesSlice';
 
-import type { TNote, TNoteWithId } from '@/types/note';
+import type { TNoteWithId } from '@/types/note';
 import type { TAuthenticatedUser, TUser } from '@/types/user';
 import type { JSONContent } from '@tiptap/core';
 import type { NextPage } from 'next';
@@ -57,7 +36,8 @@ const NoteDetailPage: NextPage = () => {
 
   const [note, setNote] = useState<TNoteWithId>();
   const [owner, setOwner] = useState<TUser | TAuthenticatedUser>();
-  const [favorited, setFavorited] = useState(false);
+
+  const [noteDetailsModalOpen, setNoteDetailsModalOpen] = useState(false);
 
   const isOwner = useMemo(() => {
     if (!authenticatedUserSelector) return false;
@@ -83,99 +63,6 @@ const NoteDetailPage: NextPage = () => {
       return note.body;
     }
   }, [note]);
-
-  function handleDelete(): void {
-    const confirmStatus = confirm(
-      "Are you sure you want to delete this note? You can't undo this action."
-    );
-    if (confirmStatus) {
-      const noteDocRef = doc(notesCollection, note?.id);
-
-      deleteDoc(noteDocRef)
-        .then(() => {
-          console.log('Note deleted');
-
-          dispatch(deletePersonalNote(note?.id as string));
-
-          router.push('/').catch((err) => console.log(err));
-        })
-        .catch((err) => {
-          console.log('Error deleting note', err);
-        });
-    }
-  }
-
-  async function handleFavorite(): Promise<void> {
-    if (!authenticatedUserSelector || authenticatedUserSelector.uid === '') {
-      await router.push('/login');
-    }
-
-    const noteDocRef = doc(notesCollection, note?.id);
-
-    if (favorited) {
-      try {
-        await updateDoc(noteDocRef, {
-          favoritedBy: arrayRemove(authenticatedUserSelector.uid)
-        });
-        dispatch(deleteFavorite(note?.id as string));
-        setFavorited(false);
-      } catch (err) {
-        console.log('Error unfavoriting note', err);
-      }
-      return;
-    } else {
-      try {
-        await updateDoc(noteDocRef, {
-          favoritedBy: arrayUnion(authenticatedUserSelector.uid)
-        });
-        dispatch(addFavorite(note as TNoteWithId));
-        setFavorited(true);
-      } catch (err) {
-        console.log('Error favoriting note', err);
-      }
-    }
-  }
-
-  async function handleShare(): Promise<void> {
-    await navigator.clipboard.writeText(window.location.href);
-
-    alert("Note's link copied to clipboard");
-  }
-
-  async function handleDuplicate(): Promise<void> {
-    const confirmed = confirm('Duplicate the note and add it to your notes?');
-
-    if (confirmed) {
-      try {
-        const now = Timestamp.now().toMillis();
-
-        const duplicateNote: TNote = {
-          ...(note as TNote),
-          favoritedBy: [],
-          createdAt: now,
-          lastModified: now,
-          owner: authenticatedUserSelector.uid
-        };
-
-        const newDocRef = await addDoc(notesCollection, duplicateNote);
-
-        if (newDocRef.id) {
-          dispatch(addPersonalNote({ id: newDocRef.id, ...duplicateNote }));
-
-          await router.push(`/nota/${newDocRef.id}`);
-        }
-      } catch (err) {
-        console.log('Error duplicating note', err);
-      }
-    }
-  }
-
-  useEffect(() => {
-    if (!note) return;
-
-    setFavorited(note.favoritedBy?.includes(authenticatedUserSelector.uid));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [note?.favoritedBy]);
 
   // TODO: Add a listener for counting the number of favorites
   useEffect(() => {
@@ -224,7 +111,12 @@ const NoteDetailPage: NextPage = () => {
     }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [router.isReady, personalNotesSelector, authenticatedUserSelector]);
+  }, [
+    noteId,
+    router.isReady,
+    personalNotesSelector,
+    authenticatedUserSelector
+  ]);
 
   return (
     <MainLayout navbarCategories={personalNotesSelector.categories}>
@@ -237,51 +129,58 @@ const NoteDetailPage: NextPage = () => {
         }
         right={
           <>
+            {note && (
+              <NoteActionModal
+                title='Details'
+                isOpen={noteDetailsModalOpen}
+                onCloseHandler={(): void => setNoteDetailsModalOpen(false)}
+              >
+                <div>
+                  <p>
+                    Author: {owner?.username}{' '}
+                    {isOwner && (
+                      <span className='ml-1 text-secondary'>(You)</span>
+                    )}
+                  </p>
+                  <p>Category: {note?.category}</p>
+                  <p>Tags: {note?.tags.join(', ')}</p>
+                  <p>Visibility: {note?.visibility}</p>
+                  <p>
+                    Date Created:{' '}
+                    {new Date(note?.createdAt)
+                      .toISOString()
+                      .replace('T', ' ')
+                      .slice(0, 19)}
+                  </p>
+                  <p>
+                    Last Modified:{' '}
+                    {new Date(note?.lastModified)
+                      .toISOString()
+                      .replace('T', ' ')
+                      .slice(0, 19)}
+                  </p>
+                </div>
+              </NoteActionModal>
+            )}
+            <TopbarAction
+              Icon={AiOutlineInfoCircle}
+              iconClassName='fill-secondary group-hover:fill-darker'
+              text='Details'
+              onClickHandler={(): void => setNoteDetailsModalOpen(true)}
+            />
             {isOwner ? (
-              <>
-                <TopbarAction
-                  Icon={AiFillEdit}
-                  iconClassName='fill-darker/50 group-hover:fill-darker'
-                  text='Edit'
-                  href={`/nota/${note?.id as string}/edit`}
-                />
-                <TopbarAction
-                  Icon={AiFillDelete}
-                  iconClassName='fill-red-600/50 group-hover:fill-red-600'
-                  text='Delete'
-                  onClickHandler={handleDelete}
-                />
-              </>
+              <NoteTopbarIsOwner
+                router={router}
+                dispatcher={dispatch}
+                note={note as TNoteWithId}
+              />
             ) : (
-              <>
-                {favorited ? (
-                  <TopbarAction
-                    Icon={AiFillHeart}
-                    iconClassName='fill-pink-500/50 group-hover:fill-pink-500'
-                    text='Unfavorite'
-                    onClickHandler={handleFavorite}
-                  />
-                ) : (
-                  <TopbarAction
-                    Icon={AiOutlineHeart}
-                    iconClassName='fill-pink-500/50 group-hover:fill-pink-500'
-                    text='Favorite'
-                    onClickHandler={handleFavorite}
-                  />
-                )}
-                <TopbarAction
-                  Icon={HiShare}
-                  text='Share'
-                  iconClassName='fill-green-500/75 group-hover:fill-green-500'
-                  onClickHandler={handleShare}
-                />
-                <TopbarAction
-                  Icon={AiFillCopy}
-                  text='Duplicate'
-                  iconClassName='fill-darker/50 group-hover:fill-darker'
-                  onClickHandler={handleDuplicate}
-                />
-              </>
+              <NoteTopbarIsNotOwner
+                router={router}
+                dispatcher={dispatch}
+                note={note as TNoteWithId}
+                authenticatedUserSelector={authenticatedUserSelector}
+              />
             )}
           </>
         }
@@ -291,10 +190,6 @@ const NoteDetailPage: NextPage = () => {
           {note?.title}
         </h2>
         <div className='flex flex-row mt-2 space-x-4'>
-          <h3 className='font-semibold text-sm italic text-secondary'>
-            Last modified: {note?.lastModified}
-          </h3>
-
           {note?.category && (
             <h3 className='font-semibold text-sm italic text-secondary'>
               Category: {note?.category}
