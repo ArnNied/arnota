@@ -4,6 +4,7 @@ import { HiOutlineChevronDown } from 'react-icons/hi';
 
 import { ENoteVisibility } from '@/types/note';
 
+import SharedButton from '../shared/SharedButton';
 import Topbar from '../shared/Topbar';
 import Tiptap from '../tiptap/Tiptap';
 
@@ -35,52 +36,51 @@ export default function CreateOrEdit({
 }: SearchOrEditProps): JSX.Element {
   return (
     <>
-      <Topbar
-        right={
-          <>
-            <Listbox value={note.visibility}>
-              <div>
-                <Listbox.Button className='w-32 flex flex-row items-center justify-between p-1 text-start rounded'>
-                  <div className='flex flex-row items-center'>
-                    <span className='mr-1'>
-                      {NoteVisibilityIconMap[note.visibility]}
-                    </span>{' '}
-                    {note.visibility}
-                  </div>
-                  <HiOutlineChevronDown size='1.25em' className='fill' />
-                </Listbox.Button>
-                <Listbox.Options as='div' className='absolute mt-1'>
-                  {Object.values(ENoteVisibility).map((visibility) => (
-                    <Listbox.Option
-                      as='button'
-                      key={visibility}
-                      value={visibility}
-                      onClick={(): void =>
-                        setNoteHandler({ ...note, visibility: visibility })
-                      }
-                      className='flex flex-row bg-white rounded'
-                    >
-                      <div className='w-32 flex flex-row items-center p-1 hover:bg-primary/30 text-start'>
-                        <span className='mr-1'>
-                          {NoteVisibilityIconMap[visibility]}
-                        </span>{' '}
-                        {visibility}
-                      </div>
-                    </Listbox.Option>
-                  ))}
-                </Listbox.Options>
-              </div>
-            </Listbox>
-            <button
-              type='button'
-              onClick={submitHandler}
-              className='px-6 py-1 bg-primary font- text-light rounded'
-            >
-              SAVE
-            </button>
-          </>
-        }
-      />
+      <Topbar align='right'>
+        <div className='flex flex-row space-x-2'>
+          <Listbox value={note.visibility}>
+            <div>
+              <Listbox.Button className='w-32 flex flex-row items-center justify-between p-1 text-start rounded'>
+                <div className='flex flex-row items-center'>
+                  <span className='mr-1'>
+                    {NoteVisibilityIconMap[note.visibility]}
+                  </span>{' '}
+                  {note.visibility}
+                </div>
+                <HiOutlineChevronDown size='1.25em' className='fill' />
+              </Listbox.Button>
+              <Listbox.Options
+                as='div'
+                className='absolute mt-1 rounded overflow-hidden'
+              >
+                {Object.values(ENoteVisibility).map((visibility) => (
+                  <Listbox.Option
+                    as='button'
+                    key={visibility}
+                    value={visibility}
+                    onClick={(): void =>
+                      setNoteHandler({ ...note, visibility: visibility })
+                    }
+                    className='flex flex-row bg-white'
+                  >
+                    <div className='w-32 flex flex-row items-center p-1 hover:bg-primary/30 text-start'>
+                      <span className='mr-1'>
+                        {NoteVisibilityIconMap[visibility]}
+                      </span>{' '}
+                      {visibility}
+                    </div>
+                  </Listbox.Option>
+                ))}
+              </Listbox.Options>
+            </div>
+          </Listbox>
+          <SharedButton
+            type='PRIMARY'
+            text='Save'
+            onClickHandler={submitHandler}
+          />
+        </div>
+      </Topbar>
 
       <div className='p-8 mt-12 space-y-4'>
         <input

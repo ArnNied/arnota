@@ -5,7 +5,7 @@ import { AiFillEdit, AiFillDelete } from 'react-icons/ai';
 import { notesCollection } from '@/lib/firebase/firestore';
 import { deletePersonalNote } from '@/store/slices/personalNotesSlice';
 
-import TopbarAction from '../shared/TopbarAction';
+import SharedButton from '../shared/SharedButton';
 
 import NoteActionModal from './NoteActionModal';
 
@@ -24,7 +24,7 @@ export default function NoteTopbarIsOwner({
   dispatcher,
   note
 }: NoteTopbarIsOwnerProps): JSX.Element {
-  const [noteDeleteModalOpen, setNoteDeleteModalOpen] = useState(false);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
 
   async function handleDelete(): Promise<void> {
     const noteDocRef = doc(notesCollection, note.id);
@@ -45,35 +45,34 @@ export default function NoteTopbarIsOwner({
       <NoteActionModal
         title='Are you sure?'
         description='This is the final step to delete your note. This action is irreversible.'
-        isOpen={noteDeleteModalOpen}
-        onCloseHandler={(): void => setNoteDeleteModalOpen(false)}
+        isOpen={deleteModalOpen}
+        onCloseHandler={(): void => setDeleteModalOpen(false)}
       >
         <div className='flex flex-row space-x-4'>
-          <button
-            className='px-4 py-1 border border-primary text-primary rounded'
-            onClick={(): void => setNoteDeleteModalOpen(false)}
-          >
-            Cancel
-          </button>
-          <button
-            className='px-4 py-1 bg-primary text-light rounded'
-            onClick={handleDelete}
-          >
-            Yes, delete my note
-          </button>
+          <SharedButton
+            type='INVERTED'
+            text='Cancel'
+            onClickHandler={(): void => setDeleteModalOpen(false)}
+          />
+          <SharedButton
+            type='PRIMARY'
+            text='Yes, delete this note'
+            onClickHandler={handleDelete}
+          />
         </div>
       </NoteActionModal>
-      <TopbarAction
+
+      <SharedButton
         Icon={AiFillEdit}
         iconClassName='fill-darker/50 group-hover:fill-darker'
         text='Edit'
         href={`/nota/${note.id}/edit`}
       />
-      <TopbarAction
+      <SharedButton
         Icon={AiFillDelete}
         iconClassName='fill-red-600/50 group-hover:fill-red-600'
         text='Delete'
-        onClickHandler={(): void => setNoteDeleteModalOpen(true)}
+        onClickHandler={(): void => setDeleteModalOpen(true)}
       />
     </>
   );

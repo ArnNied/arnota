@@ -5,6 +5,7 @@ import { useState } from 'react';
 
 import AuthForbiddenMixin from '@/components/mixin/AuthForbiddenMixin';
 import InputWithLabel from '@/components/shared/InputWithLabel';
+import SharedButton from '@/components/shared/SharedButton';
 import { auth } from '@/lib/firebase/core';
 import { useInitializeState } from '@/lib/hooks';
 import { setAuthenticatedUserFunction } from '@/lib/utils';
@@ -75,12 +76,12 @@ const LoginPage: NextPage = () => {
                 onChangeHandler={(e): void => setPassword(e.target.value)}
               />
             </div>
-            <button
-              type='submit'
-              className='w-full mt-2 px-2 py-1 bg-primary text-white rounded'
-            >
-              Sign In
-            </button>
+            <SharedButton
+              type='PRIMARY'
+              text='Sign In'
+              inputType='submit'
+              additionalContainerClassName='w-full mt-2'
+            />
             <div className='my-4 border'></div>
             <p className='font-semibold'>
               New to Arnota?{' '}

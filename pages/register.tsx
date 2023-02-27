@@ -6,6 +6,7 @@ import { useState } from 'react';
 
 import AuthForbiddenMixin from '@/components/mixin/AuthForbiddenMixin';
 import InputWithLabel from '@/components/shared/InputWithLabel';
+import SharedButton from '@/components/shared/SharedButton';
 import { auth } from '@/lib/firebase/core';
 import { usersCollection } from '@/lib/firebase/firestore';
 import { useInitializeState } from '@/lib/hooks';
@@ -109,12 +110,12 @@ const RegisterPage: NextPage = () => {
                 onChangeHandler={(e): void => setPassword(e.target.value)}
               />
             </div>
-            <button
-              type='submit'
-              className='w-full mt-2 px-2 py-1 bg-primary bg-blend-overlay text-white rounded'
-            >
-              Sign Up
-            </button>
+            <SharedButton
+              type='PRIMARY'
+              text='Sign Up'
+              inputType='submit'
+              additionalContainerClassName='w-full mt-2'
+            />
             <div className='my-4 border'></div>
             <p className='font-semibold'>
               Already have an account?{' '}

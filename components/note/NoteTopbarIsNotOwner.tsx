@@ -23,7 +23,7 @@ import {
 } from '@/store/slices/favoritedNotesSlice';
 import { addPersonalNote } from '@/store/slices/personalNotesSlice';
 
-import TopbarAction from '../shared/TopbarAction';
+import SharedButton from '../shared/SharedButton';
 
 import NoteActionModal from './NoteActionModal';
 
@@ -46,8 +46,8 @@ export default function NoteTopbarIsNotOwner({
   authenticatedUserSelector
 }: NoteTopbarIsOwnerProps): JSX.Element {
   const [favorited, setFavorited] = useState(false);
-  const [noteShareModalOpen, setNoteShareModalOpen] = useState(false);
-  const [noteDuplicateModalOpen, setNoteDuplicateModalOpen] = useState(false);
+  const [shareModalOpen, setShareModalOpen] = useState(false);
+  const [duplicateModalOpen, setuplicateModalOpen] = useState(false);
 
   async function handleFavorite(): Promise<void> {
     if (!authenticatedUserSelector || authenticatedUserSelector.uid === '') {
@@ -105,7 +105,7 @@ export default function NoteTopbarIsNotOwner({
       const newDocRef = await addDoc(notesCollection, duplicateNote);
 
       if (newDocRef.id) {
-        setNoteDuplicateModalOpen(false);
+        setuplicateModalOpen(false);
 
         dispatcher(addPersonalNote({ ...duplicateNote, id: newDocRef.id }));
 
@@ -136,8 +136,8 @@ export default function NoteTopbarIsNotOwner({
     <>
       <NoteActionModal
         title='Share this note'
-        isOpen={noteShareModalOpen}
-        onCloseHandler={(): void => setNoteShareModalOpen(false)}
+        isOpen={shareModalOpen}
+        onCloseHandler={(): void => setShareModalOpen(false)}
       >
         <div className='w-full flex flex-row flex-wrap justify-center space-x-2'>
           <button
@@ -161,50 +161,48 @@ export default function NoteTopbarIsNotOwner({
       <NoteActionModal
         title='Duplicate this note?'
         description='This will duplicate the everything except who favorited it.'
-        isOpen={noteDuplicateModalOpen}
-        onCloseHandler={(): void => setNoteDuplicateModalOpen(false)}
+        isOpen={duplicateModalOpen}
+        onCloseHandler={(): void => setuplicateModalOpen(false)}
       >
         <div className='flex flex-row space-x-4'>
-          <button
-            className='px-4 py-1 border border-primary text-primary rounded'
-            onClick={(): void => setNoteDuplicateModalOpen(false)}
-          >
-            Cancel
-          </button>
-          <button
-            className='px-4 py-1 bg-primary text-light rounded'
-            onClick={handleDuplicate}
-          >
-            Yes, duplicate this note
-          </button>
+          <SharedButton
+            type='INVERTED'
+            text='Cancel'
+            onClickHandler={(): void => setuplicateModalOpen(false)}
+          />
+          <SharedButton
+            type='PRIMARY'
+            text='Yes, duplicate this note'
+            onClickHandler={handleDuplicate}
+          />
         </div>
       </NoteActionModal>
       {favorited ? (
-        <TopbarAction
+        <SharedButton
           Icon={AiFillHeart}
           iconClassName='fill-pink-500/50 group-hover:fill-pink-500'
           text='Unfavorite'
           onClickHandler={handleFavorite}
         />
       ) : (
-        <TopbarAction
+        <SharedButton
           Icon={AiOutlineHeart}
           iconClassName='fill-pink-500/50 group-hover:fill-pink-500'
           text='Favorite'
           onClickHandler={handleFavorite}
         />
       )}
-      <TopbarAction
+      <SharedButton
         Icon={HiShare}
         text='Share'
         iconClassName='fill-green-500/75 group-hover:fill-green-500'
-        onClickHandler={(): void => setNoteShareModalOpen(true)}
+        onClickHandler={(): void => setShareModalOpen(true)}
       />
-      <TopbarAction
+      <SharedButton
         Icon={AiFillCopy}
         text='Duplicate'
         iconClassName='fill-darker/50 group-hover:fill-darker'
-        onClickHandler={(): void => setNoteDuplicateModalOpen(true)}
+        onClickHandler={(): void => setuplicateModalOpen(true)}
       />
     </>
   );

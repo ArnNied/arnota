@@ -10,8 +10,8 @@ import MainLayout from '@/components/layouts/MainLayout';
 import NoteActionModal from '@/components/note/NoteActionModal';
 import NoteTopbarIsNotOwner from '@/components/note/NoteTopbarIsNotOwner';
 import NoteTopbarIsOwner from '@/components/note/NoteTopbarIsOwner';
+import ButtonGeneric from '@/components/shared/SharedButton';
 import Topbar from '@/components/shared/Topbar';
-import TopbarAction from '@/components/shared/TopbarAction';
 import { notesCollection, usersCollection } from '@/lib/firebase/firestore';
 import { useInitializeState } from '@/lib/hooks';
 import { configuredExtension } from '@/lib/tiptap';
@@ -120,71 +120,67 @@ const NoteDetailPage: NextPage = () => {
 
   return (
     <MainLayout navbarCategories={personalNotesSelector.categories}>
-      <Topbar
-        left={
-          <>
-            By: {owner?.username}{' '}
-            {isOwner && <span className='ml-1 text-secondary'>(You)</span>}
-          </>
-        }
-        right={
-          <>
-            {note && (
-              <NoteActionModal
-                title='Details'
-                isOpen={noteDetailsModalOpen}
-                onCloseHandler={(): void => setNoteDetailsModalOpen(false)}
-              >
-                <div>
-                  <p>
-                    Author: {owner?.username}{' '}
-                    {isOwner && (
-                      <span className='ml-1 text-secondary'>(You)</span>
-                    )}
-                  </p>
-                  <p>Category: {note?.category}</p>
-                  <p>Tags: {note?.tags.join(', ')}</p>
-                  <p>Visibility: {note?.visibility}</p>
-                  <p>
-                    Date Created:{' '}
-                    {new Date(note?.createdAt)
-                      .toISOString()
-                      .replace('T', ' ')
-                      .slice(0, 19)}
-                  </p>
-                  <p>
-                    Last Modified:{' '}
-                    {new Date(note?.lastModified)
-                      .toISOString()
-                      .replace('T', ' ')
-                      .slice(0, 19)}
-                  </p>
-                </div>
-              </NoteActionModal>
-            )}
-            <TopbarAction
-              Icon={AiOutlineInfoCircle}
-              iconClassName='fill-secondary group-hover:fill-darker'
-              text='Details'
-              onClickHandler={(): void => setNoteDetailsModalOpen(true)}
+      <Topbar align='between'>
+        <p className='text-darker'>
+          By: {owner?.username}
+          {isOwner && <span className='ml-1 text-secondary'>(You)</span>}
+        </p>
+        <div className='flex flex-row space-x-2'>
+          {note && (
+            <NoteActionModal
+              title='Details'
+              isOpen={noteDetailsModalOpen}
+              onCloseHandler={(): void => setNoteDetailsModalOpen(false)}
+            >
+              <div>
+                <p>
+                  Author: {owner?.username}
+                  {isOwner && (
+                    <span className='ml-1 text-secondary'>(You)</span>
+                  )}
+                </p>
+                <p>Category: {note?.category}</p>
+                <p>Tags: {note?.tags.join(', ')}</p>
+                <p>Visibility: {note?.visibility}</p>
+                <p>
+                  Date Created:{' '}
+                  {new Date(note?.createdAt)
+                    .toISOString()
+                    .replace('T', ' ')
+                    .slice(0, 19)}
+                </p>
+                <p>
+                  Last Modified:{' '}
+                  {new Date(note?.lastModified)
+                    .toISOString()
+                    .replace('T', ' ')
+                    .slice(0, 19)}
+                </p>
+              </div>
+            </NoteActionModal>
+          )}
+          <ButtonGeneric
+            Icon={AiOutlineInfoCircle}
+            iconClassName='fill-secondary group-hover:fill-darker'
+            text='Details'
+            onClickHandler={(): void => setNoteDetailsModalOpen(true)}
+          />
+          {isOwner ? (
+            <NoteTopbarIsOwner
+              router={router}
+              dispatcher={dispatch}
+              note={note as TNoteWithId}
             />
-            {isOwner ? (
-              <NoteTopbarIsOwner
-                router={router}
-                dispatcher={dispatch}
-                note={note as TNoteWithId}
-              />
-            ) : (
-              <NoteTopbarIsNotOwner
-                router={router}
-                dispatcher={dispatch}
-                note={note as TNoteWithId}
-                authenticatedUserSelector={authenticatedUserSelector}
-              />
-            )}
-          </>
-        }
-      />
+          ) : (
+            <NoteTopbarIsNotOwner
+              router={router}
+              dispatcher={dispatch}
+              note={note as TNoteWithId}
+              authenticatedUserSelector={authenticatedUserSelector}
+            />
+          )}
+        </div>
+      </Topbar>
       <div className='p-8 mt-12'>
         <h2 className='font-bold font-poppins text-4xl text-darker'>
           {note?.title}
