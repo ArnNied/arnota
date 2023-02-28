@@ -40,19 +40,23 @@ const NoteCreatePage: NextPage = () => {
       lastModified: now
     };
 
-    const noteDocRef = await addDoc(notesCollection, _note);
+    try {
+      const noteDocRef = await addDoc(notesCollection, _note);
 
-    if (noteDocRef.id) {
-      const noteWithId: TNoteWithId = {
-        id: noteDocRef.id,
-        ..._note
-      };
+      if (noteDocRef.id) {
+        const noteWithId: TNoteWithId = {
+          id: noteDocRef.id,
+          ..._note
+        };
 
-      dispatch(addPersonalNote(noteWithId));
+        dispatch(addPersonalNote(noteWithId));
 
-      await router.push(`/nota/${noteDocRef.id}`);
-    } else {
-      console.log('Error in NoteCreatePage handleSubmit');
+        await router.push(`/nota/${noteDocRef.id}`);
+      } else {
+        console.log('Error in NoteCreatePage handleSubmit');
+      }
+    } catch (err) {
+      console.log('Error in NoteCreatePage handleSubmit', err);
     }
   }
 

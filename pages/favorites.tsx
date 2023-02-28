@@ -9,6 +9,7 @@ import SearchField from '@/components/shared/SearchField';
 import { notesCollection } from '@/lib/firebase/firestore';
 import { useInitializeState } from '@/lib/hooks';
 import { useAppSelector } from '@/store/hooks';
+import { ENoteVisibility } from '@/types/note';
 
 import type { TNoteWithId } from '@/types/note';
 import type { NextPage } from 'next';
@@ -32,6 +33,7 @@ const FavoritesPage: NextPage = () => {
     if (favoritedNotesSelector.hasBeenFetched === false) {
       const q = query(
         notesCollection,
+        where('visibility', '!=', ENoteVisibility.PRIVATE),
         where('favoritedBy', 'array-contains', authUser?.uid)
       );
       getDocs(q)

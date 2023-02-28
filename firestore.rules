@@ -1,8 +1,127 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    match /{document=**} {
-      allow read, write: if true;
+    function incomingData() {
+      return request.resource.data;
+    }
+
+    function existingData() {
+      return resource.data;
+    }
+
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner() {
+      return isAuthenticated() && request.auth.uid == existingData().owner;
+    }
+
+    function noteFields() {
+      return [
+        'owner',
+        'title',
+        'body',
+        'plainBody',
+        'category',
+        'visibility',
+        'tags',
+        'favoritedBy',
+        'createdAt',
+        'lastModified'
+      ];
+    }
+
+    function isValidNoteStructure(data) {
+      return data.keys().hasAll(noteFields())
+        && (data.owner is string)
+        && (data.title is string && data.title.size() > 0)
+        && (data.body is string && data.body.size() > 0)
+        && (data.plainBody is string && data.plainBody.size() > 0)
+        && (data.category is string)
+        && (data.visibility is string
+          && (data.visibility == 'PUBLIC'
+            || data.visibility == 'LIMITED'
+            || data.visibility == 'PRIVATE'
+          )
+        )
+        && (data.tags is list)
+        && (data.favoritedBy is list)
+        && (data.createdAt is number)
+        && (data.lastModified is number)
+    }
+
+    function actionFavorite(data) {
+      return data.diff(existingData()).affectedKeys().hasAll(['favoritedBy'])
+        && (
+          // Favoriting
+          (
+            // Final list size must be increased by 1
+            data.favoritedBy.size() == existingData().favoritedBy.size() + 1
+
+            // User uid must not be on the initial list
+            && !(request.auth.uid in existingData().favoritedBy)
+
+            // User uid must be on the final list
+            // Plus the previous two condition, this is to make it so that
+            // Only the user can add themselves to the list
+            && request.auth.uid in data.favoritedBy
+
+            // owner uid must not be on the final list
+            // Prevent the owner from favoriting his own note
+            && !(existingData().owner in data.favoritedBy)
+          )
+        ||
+          // Unfavoriting
+          (
+          // Final list size must be decreased by 1
+          data.favoritedBy.size() == existingData().favoritedBy.size() - 1
+
+          // User uid must be on the initial list
+          && request.auth.uid in existingData().favoritedBy
+
+          // User uid must not be on the final list
+          // Plus the previous two condition, this is to make it so that
+          // Only the user can remove themselves from the list
+          && !(request.auth.uid in data.favoritedBy)
+          )
+        )
+    }
+
+    match /notes/{noteId} {
+      allow list: if isOwner()
+                || existingData().visibility == 'PUBLIC'
+                || (
+                  existingData().visibility != 'PRIVATE'
+                  && request.auth.uid in existingData().favoritedBy
+                )
+
+      allow get: if isOwner() || existingData().visibility != 'PRIVATE'
+
+      allow create: if isAuthenticated()
+                  && isValidNoteStructure(incomingData())
+
+                  // Ensure that the note is not favorited by anyone
+                  // On creation
+                  && incomingData().favoritedBy.size() == 0
+
+                  // Ensure that the owner field is the authenticated user
+                  // This is to prevent the user from creating a note with
+                  // Another user's uid
+                  && incomingData().owner == request.auth.uid
+
+      allow update: if isValidNoteStructure(incomingData())
+                  && (
+                    isOwner() && !actionFavorite(incomingData())
+                    || actionFavorite(incomingData())
+                    )
+
+      allow delete: if isOwner();
+    }
+
+    match /users/{userUid} {
+      allow read: if true;
+      allow write: if isAuthenticated() && request.auth.uid == userUid;
     }
   }
 }
