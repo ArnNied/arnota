@@ -183,7 +183,7 @@ const NoteDetailPage: NextPage = () => {
           )}
         </div>
 
-        <div className='mt-4 font-poppins text-darker whitespace-pre-wrap'>
+        <div className='mt-4 font-poppins text-darker whitespace-pre-wrap ProseMirror'>
           {parse(output ?? '')}
         </div>
       </div>

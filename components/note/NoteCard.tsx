@@ -78,7 +78,7 @@ export default function NoteCard({ note }: NoteCardProps): JSX.Element {
       <h3 className='my-1 text-xs italic text-secondary'>
         Created: {formatDate(note.createdAt)}
       </h3>
-      <div className='text-sm text-darker whitespace-pre-wrap'>
+      <div className='text-sm text-darker whitespace-pre-wrap ProseMirror'>
         {parsedBody}
       </div>
       <p className='mt-1 text-xs italic text-secondary'>By: {ownerUsername}</p>

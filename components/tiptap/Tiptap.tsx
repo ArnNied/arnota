@@ -1,5 +1,10 @@
 import { EditorContent } from '@tiptap/react';
-import { AiOutlineBold, AiOutlineItalic } from 'react-icons/ai';
+import {
+  AiOutlineBold,
+  AiOutlineItalic,
+  AiOutlineOrderedList,
+  AiOutlineUnorderedList
+} from 'react-icons/ai';
 import { BiHeading } from 'react-icons/bi';
 
 import TiptapExtensionButton from './TiptapExtensionButton';
@@ -53,6 +58,21 @@ export default function Tiptap({ editor }: TiptapProps): JSX.Element {
           isActive={editor?.isActive('heading', { level: 3 })}
           onClickHandler={(): boolean | undefined =>
             editor?.chain().focus().toggleHeading({ level: 3 }).run()
+          }
+        />
+        {/* TODO: Fix isActive state for nested element of OrderedList and BulletList extension */}
+        <TiptapExtensionButton
+          Icon={AiOutlineOrderedList}
+          isActive={editor?.isActive('orderedList')}
+          onClickHandler={(): boolean | undefined =>
+            editor?.chain().focus().toggleOrderedList().run()
+          }
+        />
+        <TiptapExtensionButton
+          Icon={AiOutlineUnorderedList}
+          isActive={editor?.isActive('bulletList')}
+          onClickHandler={(): boolean | undefined =>
+            editor?.chain().focus().toggleBulletList().run()
           }
         />
       </div>

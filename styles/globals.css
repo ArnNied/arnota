@@ -30,3 +30,22 @@ body {
   height: 0;
   pointer-events: none;
 }
+
+/* Prevent the text from being right below the marker*/
+.ProseMirror ul p,
+.ProseMirror ol p {
+  @apply inline-block;
+}
+
+/* Align the marker to the top due to the paragprah being an inline-block */
+.ProseMirror ul li *,
+.ProseMirror ol li * {
+  @apply align-top;
+}
+
+.ProseMirror ul ul,
+.ProseMirror ul ol,
+.ProseMirror ol ul,
+.ProseMirror ol ol {
+  @apply ml-4;
+}
