@@ -8,14 +8,17 @@ import NoteList from '@/components/note/NoteList';
 import SearchField from '@/components/shared/SearchField';
 import { notesCollection } from '@/lib/firebase/firestore';
 import { useInitializeState } from '@/lib/hooks';
-import { useAppSelector } from '@/store/hooks';
+import { simplifyNoteData } from '@/lib/utils';
+import { useAppDispatch, useAppSelector } from '@/store/hooks';
+import { setFavorites } from '@/store/slices/favoritedNotesSlice';
 import { ENoteVisibility } from '@/types/note';
 
-import type { TNoteWithId } from '@/types/note';
+import type { TNote } from '@/types/note';
 import type { NextPage } from 'next';
 
 const FavoritesPage: NextPage = () => {
   const router = useRouter();
+  const dispatch = useAppDispatch();
 
   const { authUserLoading, authUser, personalNotesSelector } =
     useInitializeState();
@@ -25,7 +28,7 @@ const FavoritesPage: NextPage = () => {
   );
 
   const [search, setSearch] = useState<string>('');
-  const [filteredNotes, setFilteredNotes] = useState<TNoteWithId[]>([]);
+  const [filteredNotes, setFilteredNotes] = useState<TNote[]>([]);
 
   useEffect(() => {
     if (!authUser) return;
@@ -38,19 +41,21 @@ const FavoritesPage: NextPage = () => {
       );
       getDocs(q)
         .then((querySnapshot) => {
-          const notes: TNoteWithId[] = [];
-          querySnapshot.forEach((doc) => {
-            const note = doc.data() as TNoteWithId;
-            note.id = doc.id;
-            notes.push(note);
+          const notes: TNote[] = [];
+          querySnapshot.forEach((noteDoc) => {
+            const noteDocData = simplifyNoteData(noteDoc.data());
+            noteDocData.id = noteDoc.id;
+            notes.push(noteDocData);
           });
 
           setFilteredNotes(notes);
+          dispatch(setFavorites(notes));
         })
         .catch((error) => {
           console.log('Error getting documents: ', error);
         });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [authUser, favoritedNotesSelector.hasBeenFetched]);
 
   useEffect(() => {

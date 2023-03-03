@@ -6,9 +6,6 @@ export type TAuthenticatedUser = {
 };
 
 export type TUser = {
+  id: string;
   username: string;
-};
-
-export type TUserWithUid = TUser & {
-  uid: string;
 };

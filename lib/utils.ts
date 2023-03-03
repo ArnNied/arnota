@@ -1,28 +1,44 @@
-import { doc, getDoc, getDocs, query, where } from 'firebase/firestore';
+import {
+  doc,
+  getDoc,
+  getDocs,
+  query,
+  Timestamp,
+  where
+} from 'firebase/firestore';
 
 import { setAuthenticatedUser } from '@/store/slices/authenticatedUserSlice';
 import { setPersonalNotes } from '@/store/slices/personalNotesSlice';
-import { ENoteVisibility } from '@/types/note';
 
 import { notesCollection, usersCollection } from './firebase/firestore';
 
 import type { useAppDispatch } from '@/store/hooks';
-import type { TNoteWithId, TNote } from '@/types/note';
+import type { PlainTimestamp, TNote } from '@/types/note';
 import type { TUser } from '@/types/user';
 import type { User } from 'firebase/auth';
 
-export const emptyNote: TNote = {
-  owner: '',
-  title: '',
-  body: '',
-  plainBody: '',
-  category: '',
-  tags: [],
-  visibility: ENoteVisibility.PRIVATE,
-  favoritedBy: [],
-  lastModified: 0,
-  createdAt: 0
-};
+export function formatDate(param: Date): string;
+export function formatDate(param: PlainTimestamp): string;
+
+export function formatDate(param: Date | PlainTimestamp): string {
+  if (param instanceof Date) {
+    return param.toISOString().replace('T', ' ').slice(0, 19);
+  } else {
+    return new Timestamp(param.seconds, param.nanoseconds)
+      .toDate()
+      .toISOString()
+      .replace('T', ' ')
+      .slice(0, 19);
+  }
+}
+
+export function simplifyNoteData(note: TNote): TNote {
+  return {
+    ...note,
+    createdAt: { ...note.createdAt } as PlainTimestamp,
+    lastModified: { ...note.lastModified } as PlainTimestamp
+  };
+}
 
 // Populate the store with the user's notes
 // and set the authenticated user in case of a refresh
@@ -35,13 +51,10 @@ export async function isLoggedIn(
   const q = query(notesCollection, where('owner', '==', user.uid));
 
   const querySnapshot = await getDocs(q);
-  const temp: TNoteWithId[] = [];
+  const temp: TNote[] = [];
   querySnapshot.forEach((noteDoc) => {
-    const data = noteDoc.data();
-    temp.push({
-      ...data,
-      id: noteDoc.id
-    });
+    const data = simplifyNoteData(noteDoc.data());
+    temp.push(data);
   });
 
   dispatcher(setPersonalNotes(temp));

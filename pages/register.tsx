@@ -13,6 +13,7 @@ import { useInitializeState } from '@/lib/hooks';
 import { setAuthenticatedUserFunction } from '@/lib/utils';
 import { useAppDispatch } from '@/store/hooks';
 
+import type { TUser } from '@/types/user';
 import type { NextPage } from 'next';
 
 const RegisterPage: NextPage = () => {
@@ -50,7 +51,7 @@ const RegisterPage: NextPage = () => {
 
         await setDoc(userDocRef, {
           username
-        });
+        } as Omit<TUser, 'id'>);
 
         setAuthenticatedUserFunction(registeredUser.user, dispatch).catch(
           (err) => {

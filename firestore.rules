@@ -14,6 +14,8 @@ service cloud.firestore {
     }
 
     function isOwner() {
+      // Reject if the user is not authenticated
+      // And ensure that the owner field is the authenticated user
       return isAuthenticated() && request.auth.uid == existingData().owner;
     }
 
@@ -47,11 +49,43 @@ service cloud.firestore {
         )
         && (data.tags is list)
         && (data.favoritedBy is list)
-        && (data.createdAt is number)
-        && (data.lastModified is number)
+        && (data.createdAt is timestamp)
+        && (data.lastModified is timestamp)
     }
 
-    function actionFavorite(data) {
+    function noteCreate() {
+      return isValidNoteStructure(incomingData())
+
+            // Ensure that the note is not favorited by anyone
+            // On creation
+            && incomingData().favoritedBy.size() == 0
+
+            // Ensure that the owner field is the authenticated user
+            // This is to prevent the user from creating a note with
+            // Another user's uid
+            && incomingData().owner == request.auth.uid
+    }
+
+    function noteUpdate() {
+      return isValidNoteStructure(incomingData())
+            && isOwner()
+
+            // Ensure it is not a favorite action
+            && !actionNoteFavorite(incomingData())
+
+            // Ensure that it doesnn't modify unintended fields
+            && incomingData().diff(existingData()).affectedKeys().hasOnly([
+              'title',
+              'body',
+              'plainBody',
+              'category',
+              'visibility',
+              'tags',
+              'lastModified'
+              ])
+    }
+
+    function actionNoteFavorite(data) {
       return data.diff(existingData()).affectedKeys().hasAll(['favoritedBy'])
         && (
           // Favoriting
@@ -99,21 +133,12 @@ service cloud.firestore {
       allow get: if isOwner() || existingData().visibility != 'PRIVATE'
 
       allow create: if isAuthenticated()
-                  && isValidNoteStructure(incomingData())
-
-                  // Ensure that the note is not favorited by anyone
-                  // On creation
-                  && incomingData().favoritedBy.size() == 0
-
-                  // Ensure that the owner field is the authenticated user
-                  // This is to prevent the user from creating a note with
-                  // Another user's uid
-                  && incomingData().owner == request.auth.uid
+                  && noteCreate()
 
       allow update: if isValidNoteStructure(incomingData())
                   && (
-                    isOwner() && !actionFavorite(incomingData())
-                    || actionFavorite(incomingData())
+                    noteUpdate()
+                    || actionNoteFavorite(incomingData())
                     )
 
       allow delete: if isOwner();

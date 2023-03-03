@@ -2,10 +2,10 @@ import Masonry from 'react-responsive-masonry';
 
 import NoteCard from './NoteCard';
 
-import type { TNoteWithId } from '@/types/note';
+import type { TNote } from '@/types/note';
 
 type NoteListProps = {
-  notes: TNoteWithId[];
+  notes: TNote[];
   noNotesMessage?: string;
   noNotesSubMessage?: string;
 };

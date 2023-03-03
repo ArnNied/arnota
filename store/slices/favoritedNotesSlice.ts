@@ -1,10 +1,10 @@
 import { createSlice } from '@reduxjs/toolkit';
 
-import type { TNoteWithId } from '@/types/note';
+import type { TNote } from '@/types/note';
 import type { PayloadAction } from '@reduxjs/toolkit';
 
 type TInitialState = {
-  notes: TNoteWithId[];
+  notes: TNote[];
   hasBeenFetched: boolean;
 };
 const initialState: TInitialState = {
@@ -16,13 +16,13 @@ export const noteSlice = createSlice({
   name: 'favoritedNotes',
   initialState: initialState,
   reducers: {
-    setFavorites: (state, action: PayloadAction<TNoteWithId[]>) => {
+    setFavorites: (state, action: PayloadAction<TNote[]>) => {
       return {
         notes: action.payload,
         hasBeenFetched: true
       };
     },
-    addFavorite: (state, action: PayloadAction<TNoteWithId>) => {
+    addFavorite: (state, action: PayloadAction<TNote>) => {
       const index = state.notes.findIndex(
         (note) => note.id === action.payload.id
       );
@@ -31,7 +31,7 @@ export const noteSlice = createSlice({
         state.notes.push(action.payload);
       }
     },
-    updateFavorite: (state, action: PayloadAction<TNoteWithId>) => {
+    updateFavorite: (state, action: PayloadAction<TNote>) => {
       const index = state.notes.findIndex(
         (note) => note.id === action.payload.id
       );

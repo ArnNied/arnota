@@ -3,8 +3,9 @@ import {
   updateDoc,
   arrayRemove,
   arrayUnion,
-  Timestamp,
-  addDoc
+  addDoc,
+  serverTimestamp,
+  getDoc
 } from 'firebase/firestore';
 import { useEffect, useState } from 'react';
 import {
@@ -28,14 +29,15 @@ import SharedButton from '../shared/SharedButton';
 import NoteActionModal from './NoteActionModal';
 
 import type { useAppDispatch } from '@/store/hooks';
-import type { TNoteWithId, TNote } from '@/types/note';
+import type { TNote } from '@/types/note';
 import type { TAuthenticatedUser } from '@/types/user';
+import type { WithFieldValue } from 'firebase/firestore';
 import type { NextRouter } from 'next/router';
 
 type NoteTopbarIsOwnerProps = {
   router: NextRouter;
   dispatcher: ReturnType<typeof useAppDispatch>;
-  note: TNoteWithId;
+  note: TNote;
   authenticatedUserSelector: TAuthenticatedUser;
 };
 
@@ -92,22 +94,22 @@ export default function NoteTopbarIsNotOwner({
 
   async function handleDuplicate(): Promise<void> {
     try {
-      const now = Timestamp.now().toMillis();
-
-      const duplicateNote: TNote = {
-        ...(note as TNote),
+      const duplicateNote: WithFieldValue<Omit<TNote, 'id'>> = {
+        ...note,
         favoritedBy: [],
-        createdAt: now,
-        lastModified: now,
+        createdAt: serverTimestamp(),
+        lastModified: serverTimestamp(),
         owner: authenticatedUserSelector.uid
       };
 
       const newDocRef = await addDoc(notesCollection, duplicateNote);
 
-      if (newDocRef.id) {
-        setuplicateModalOpen(false);
+      const newDocSnap = await getDoc(newDocRef);
 
-        dispatcher(addPersonalNote({ ...duplicateNote, id: newDocRef.id }));
+      if (newDocRef.id && newDocSnap.exists()) {
+        const newDocData = newDocSnap.data() as TNote;
+
+        dispatcher(addPersonalNote(newDocData));
 
         // TODO: Fix this hacky solution
         // This is a hacky solution to the problem of the router not

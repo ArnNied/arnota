@@ -9,14 +9,14 @@ import NoteList from '@/components/note/NoteList';
 import SearchField from '@/components/shared/SearchField';
 import { useInitializeState } from '@/lib/hooks';
 
-import type { TNoteWithId } from '@/types/note';
+import type { TNote } from '@/types/note';
 import type { NextPage } from 'next';
 
 const IndexPage: NextPage = () => {
   const { authUser, personalNotesSelector } = useInitializeState();
 
   const [search, setSearch] = useState<string>('');
-  const [filteredNotes, setFilteredNotes] = useState<TNoteWithId[]>([]);
+  const [filteredNotes, setFilteredNotes] = useState<TNote[]>([]);
 
   useEffect(() => {
     if (search === '') {

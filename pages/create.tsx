@@ -1,5 +1,5 @@
 import { useEditor } from '@tiptap/react';
-import { addDoc, Timestamp } from 'firebase/firestore';
+import { addDoc, getDoc, serverTimestamp } from 'firebase/firestore';
 import { useRouter } from 'next/router';
 import { useState } from 'react';
 import { useDispatch } from 'react-redux';
@@ -10,10 +10,12 @@ import CreateOrEdit from '@/components/note/CreateOrEdit';
 import { notesCollection } from '@/lib/firebase/firestore';
 import { useInitializeState } from '@/lib/hooks';
 import { configuredEditor } from '@/lib/tiptap';
-import { emptyNote } from '@/lib/utils';
+import { simplifyNoteData } from '@/lib/utils';
 import { addPersonalNote } from '@/store/slices/personalNotesSlice';
+import { ENoteVisibility } from '@/types/note';
 
-import type { TNoteWithId, TNote } from '@/types/note';
+import type { TNote } from '@/types/note';
+import type { WithFieldValue } from 'firebase/firestore';
 import type { NextPage } from 'next';
 
 const NoteCreatePage: NextPage = () => {
@@ -23,33 +25,42 @@ const NoteCreatePage: NextPage = () => {
   const { authUserLoading, authUser, personalNotesSelector } =
     useInitializeState();
 
-  const [note, setNote] = useState<TNote>(emptyNote);
+  const [noteTitle, setNoteTitle] = useState('');
+  const [noteCategory, setNoteCategory] = useState('');
+  const [noteTags, setNoteTags] = useState<string[]>([]);
+  const [noteVisibility, setNoteVisibility] = useState<ENoteVisibility>(
+    ENoteVisibility.PRIVATE
+  );
 
   const editor = useEditor(configuredEditor);
 
   async function handleSubmit(): Promise<void> {
     const body = editor?.getJSON();
-    const now: number = Timestamp.now().toMillis();
+    const plainBody = editor?.getText() as string;
 
-    const _note: TNote = {
-      ...note,
-      owner: authUser?.uid ?? '',
+    const _note: WithFieldValue<Omit<TNote, 'id'>> = {
+      owner: authUser?.uid as string,
+      title: noteTitle,
+      category: noteCategory,
+      tags: noteTags,
       body: JSON.stringify(body),
-      plainBody: editor?.getText() ?? '',
-      createdAt: now,
-      lastModified: now
+      plainBody: plainBody,
+      visibility: noteVisibility,
+      favoritedBy: [],
+      createdAt: serverTimestamp(),
+      lastModified: serverTimestamp()
     };
 
     try {
       const noteDocRef = await addDoc(notesCollection, _note);
 
-      if (noteDocRef.id) {
-        const noteWithId: TNoteWithId = {
-          id: noteDocRef.id,
-          ..._note
-        };
+      const newDocSnap = await getDoc(noteDocRef);
 
-        dispatch(addPersonalNote(noteWithId));
+      if (noteDocRef.id && newDocSnap.exists()) {
+        const noteDocData = simplifyNoteData(newDocSnap.data() as TNote);
+
+        console.log(noteDocData);
+        dispatch(addPersonalNote(noteDocData));
 
         await router.push(`/nota/${noteDocRef.id}`);
       } else {
@@ -68,9 +79,25 @@ const NoteCreatePage: NextPage = () => {
     >
       <MainLayout navbarCategories={personalNotesSelector.categories}>
         <CreateOrEdit
-          note={note}
+          note={{
+            title: {
+              value: noteTitle,
+              setter: setNoteTitle
+            },
+            category: {
+              value: noteCategory,
+              setter: setNoteCategory
+            },
+            tags: {
+              value: noteTags,
+              setter: setNoteTags
+            },
+            visibility: {
+              value: noteVisibility,
+              setter: setNoteVisibility
+            }
+          }}
           editor={editor}
-          setNoteHandler={setNote}
           submitHandler={handleSubmit}
         />
       </MainLayout>

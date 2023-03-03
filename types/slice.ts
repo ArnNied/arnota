@@ -1,7 +1,7 @@
-import type { TNoteWithId } from './note';
+import type { TNote } from './note';
 
 export type PersonalNotesSliceInitialState = {
-  notes: TNoteWithId[];
-  categories: TNoteWithId['category'][];
+  notes: TNote[];
+  categories: TNote['category'][];
   hasBeenFetched: boolean;
 };

@@ -42,7 +42,10 @@ export function genericFirestoreDataConverter<T>(): FirestoreDataConverter<T> {
       snapshot: QueryDocumentSnapshot,
       options: SnapshotOptions
     ): T {
-      return snapshot.data(options) as T;
+      return {
+        id: snapshot.id,
+        ...snapshot.data(options)
+      } as T;
     }
   };
 }

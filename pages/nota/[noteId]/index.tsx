@@ -15,9 +15,10 @@ import Topbar from '@/components/shared/Topbar';
 import { notesCollection, usersCollection } from '@/lib/firebase/firestore';
 import { useInitializeState } from '@/lib/hooks';
 import { configuredExtension } from '@/lib/tiptap';
+import { formatDate, simplifyNoteData } from '@/lib/utils';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 
-import type { TNoteWithId } from '@/types/note';
+import type { TNote } from '@/types/note';
 import type { TAuthenticatedUser, TUser } from '@/types/user';
 import type { JSONContent } from '@tiptap/core';
 import type { NextPage } from 'next';
@@ -34,7 +35,7 @@ const NoteDetailPage: NextPage = () => {
 
   const { noteId } = router.query;
 
-  const [note, setNote] = useState<TNoteWithId>();
+  const [note, setNote] = useState<TNote>();
   const [owner, setOwner] = useState<TUser | TAuthenticatedUser>();
 
   const [noteDetailsModalOpen, setNoteDetailsModalOpen] = useState(false);
@@ -81,14 +82,9 @@ const NoteDetailPage: NextPage = () => {
       getDoc(noteDocRef)
         .then((noteDoc) => {
           if (noteDoc.exists()) {
-            const noteDocData = noteDoc.data();
+            const noteDocData = simplifyNoteData(noteDoc.data());
 
-            const noteWithId: TNoteWithId = {
-              id: noteId as string,
-              ...noteDocData
-            };
-
-            setNote(noteWithId);
+            setNote(noteDocData);
 
             // Get the owner of the note if it is not owned by the authenticated user
             const userDocRef = doc(usersCollection, noteDocData.owner);
@@ -99,7 +95,7 @@ const NoteDetailPage: NextPage = () => {
                 }
               })
               .catch((error) => {
-                console.log('Error getting document:', error);
+                console.log("Error getting owner's document:", error);
               });
           } else {
             console.log('No such document!');
@@ -142,20 +138,8 @@ const NoteDetailPage: NextPage = () => {
                 <p>Category: {note?.category}</p>
                 <p>Tags: {note?.tags.join(', ')}</p>
                 <p>Visibility: {note?.visibility}</p>
-                <p>
-                  Date Created:{' '}
-                  {new Date(note?.createdAt)
-                    .toISOString()
-                    .replace('T', ' ')
-                    .slice(0, 19)}
-                </p>
-                <p>
-                  Last Modified:{' '}
-                  {new Date(note?.lastModified)
-                    .toISOString()
-                    .replace('T', ' ')
-                    .slice(0, 19)}
-                </p>
+                <p>Date Created: {formatDate(note?.createdAt)}</p>
+                <p>Last Modified: {formatDate(note?.lastModified)}</p>
               </div>
             </NoteActionModal>
           )}
@@ -169,13 +153,13 @@ const NoteDetailPage: NextPage = () => {
             <NoteTopbarIsOwner
               router={router}
               dispatcher={dispatch}
-              note={note as TNoteWithId}
+              note={note as TNote}
             />
           ) : (
             <NoteTopbarIsNotOwner
               router={router}
               dispatcher={dispatch}
-              note={note as TNoteWithId}
+              note={note as TNote}
               authenticatedUserSelector={authenticatedUserSelector}
             />
           )}

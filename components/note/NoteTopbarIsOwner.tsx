@@ -10,13 +10,13 @@ import SharedButton from '../shared/SharedButton';
 import NoteActionModal from './NoteActionModal';
 
 import type { useAppDispatch } from '@/store/hooks';
-import type { TNoteWithId } from '@/types/note';
+import type { TNote } from '@/types/note';
 import type { NextRouter } from 'next/router';
 
 type NoteTopbarIsOwnerProps = {
   router: NextRouter;
   dispatcher: ReturnType<typeof useAppDispatch>;
-  note: TNoteWithId;
+  note: TNote;
 };
 
 export default function NoteTopbarIsOwner({

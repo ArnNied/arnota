@@ -8,7 +8,6 @@ import SharedButton from '../shared/SharedButton';
 import Topbar from '../shared/Topbar';
 import Tiptap from '../tiptap/Tiptap';
 
-import type { TNote } from '@/types/note';
 import type { useEditor } from '@tiptap/react';
 
 export const NoteVisibilityIconMap = {
@@ -22,16 +21,31 @@ export const NoteVisibilityIconMap = {
 };
 
 type SearchOrEditProps = {
-  note: TNote;
+  note: {
+    title: {
+      value: string;
+      setter: React.Dispatch<React.SetStateAction<string>>;
+    };
+    category: {
+      value: string;
+      setter: React.Dispatch<React.SetStateAction<string>>;
+    };
+    tags: {
+      value: string[];
+      setter: React.Dispatch<React.SetStateAction<string[]>>;
+    };
+    visibility: {
+      value: ENoteVisibility;
+      setter: React.Dispatch<React.SetStateAction<ENoteVisibility>>;
+    };
+  };
   editor: ReturnType<typeof useEditor>;
-  setNoteHandler: (note: TNote) => void;
   submitHandler: () => void;
 };
 
 export default function CreateOrEdit({
   note,
   editor,
-  setNoteHandler,
   submitHandler
 }: SearchOrEditProps): JSX.Element {
   return (
@@ -43,9 +57,9 @@ export default function CreateOrEdit({
               <Listbox.Button className='w-32 flex flex-row items-center justify-between p-1 text-start rounded'>
                 <div className='flex flex-row items-center'>
                   <span className='mr-1'>
-                    {NoteVisibilityIconMap[note.visibility]}
+                    {NoteVisibilityIconMap[note.visibility.value]}
                   </span>{' '}
-                  {note.visibility}
+                  {note.visibility.value}
                 </div>
                 <HiOutlineChevronDown size='1.25em' className='fill' />
               </Listbox.Button>
@@ -59,7 +73,7 @@ export default function CreateOrEdit({
                     key={visibility}
                     value={visibility}
                     onClick={(): void =>
-                      setNoteHandler({ ...note, visibility: visibility })
+                      note.visibility.setter(visibility as ENoteVisibility)
                     }
                     className='flex flex-row bg-white'
                   >
@@ -87,29 +101,23 @@ export default function CreateOrEdit({
           type='text'
           placeholder='Title: Your Captivating Title'
           className='w-full py-1 bg-light font-bold text-2xl text-darker border-b-2 border-secondary focus:border-primary focus:outline-none'
-          value={note.title}
-          onChange={(e): void =>
-            setNoteHandler({ ...note, title: e.target.value })
-          }
+          value={note.title.value}
+          onChange={(e): void => note.title.setter(e.target.value.trim())}
         />
         <div className='flex flex-row space-x-4'>
           <input
             type='text'
             placeholder='Category (optional)'
             className='w-72 py-1 bg-light text-darker border-b-2 border-secondary focus:border-primary focus:outline-none'
-            value={note.category}
-            onChange={(e): void =>
-              setNoteHandler({ ...note, category: e.target.value })
-            }
+            value={note.category.value}
+            onChange={(e): void => note.category.setter(e.target.value.trim())}
           />
           <input
             type='text'
             placeholder='Tags (optional, separate with comma)'
             className='w-full py-1 bg-light text-darker border-b-2 border-secondary focus:border-primary focus:outline-none'
-            value={note.tags.map((tag) => tag.trim()).join(', ')}
-            onChange={(e): void =>
-              setNoteHandler({ ...note, tags: e.target.value.split(', ') })
-            }
+            value={note.tags.value.map((tag) => tag.trim()).join(', ')}
+            onChange={(e): void => note.tags.setter(e.target.value.split(', '))}
           />
         </div>
         <Tiptap editor={editor} />

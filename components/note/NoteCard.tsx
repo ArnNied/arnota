@@ -7,13 +7,14 @@ import { useEffect, useState } from 'react';
 
 import { usersCollection } from '@/lib/firebase/firestore';
 import { configuredExtension } from '@/lib/tiptap';
+import { formatDate } from '@/lib/utils';
 import { useAppSelector } from '@/store/hooks';
 
-import type { TNoteWithId } from '@/types/note';
+import type { TNote } from '@/types/note';
 import type { JSONContent } from '@tiptap/core';
 
 type NoteCardProps = {
-  note: TNoteWithId;
+  note: TNote;
 };
 
 export default function NoteCard({ note }: NoteCardProps): JSX.Element {
@@ -75,7 +76,7 @@ export default function NoteCard({ note }: NoteCardProps): JSX.Element {
     >
       <h2 className='font-bold text-darker break-words'>{note.title}</h2>
       <h3 className='my-1 text-xs italic text-secondary'>
-        Created: {note.createdAt}
+        Created: {formatDate(note.createdAt)}
       </h3>
       <div className='text-sm text-darker whitespace-pre-wrap'>
         {parsedBody}
