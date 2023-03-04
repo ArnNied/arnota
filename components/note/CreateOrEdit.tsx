@@ -65,7 +65,7 @@ export default function CreateOrEdit({
               </Listbox.Button>
               <Listbox.Options
                 as='div'
-                className='absolute mt-1 rounded overflow-hidden'
+                className='w-[inherit] absolute mt-3 p-1 bg-white rounded overflow-hidden'
               >
                 {Object.values(ENoteVisibility).map((visibility) => (
                   <Listbox.Option
@@ -75,9 +75,9 @@ export default function CreateOrEdit({
                     onClick={(): void =>
                       note.visibility.setter(visibility as ENoteVisibility)
                     }
-                    className='flex flex-row bg-white'
+                    className='flex flex-row'
                   >
-                    <div className='w-32 flex flex-row items-center p-1 hover:bg-primary/30 text-start'>
+                    <div className='w-32 flex flex-row items-center p-1 hover:bg-primary/30 text-start rounded'>
                       <span className='mr-1'>
                         {NoteVisibilityIconMap[visibility]}
                       </span>{' '}

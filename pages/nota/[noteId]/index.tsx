@@ -1,3 +1,4 @@
+import { Popover } from '@headlessui/react';
 import { generateHTML } from '@tiptap/core';
 import DOMPurify from 'dompurify';
 import { doc, getDoc } from 'firebase/firestore';
@@ -122,33 +123,30 @@ const NoteDetailPage: NextPage = () => {
           {isOwner && <span className='ml-1 text-secondary'>(You)</span>}
         </p>
         <div className='flex flex-row space-x-2'>
-          {note && (
-            <NoteActionModal
-              title='Details'
-              isOpen={noteDetailsModalOpen}
-              onCloseHandler={(): void => setNoteDetailsModalOpen(false)}
-            >
-              <div>
-                <p>
-                  Author: {owner?.username}
-                  {isOwner && (
-                    <span className='ml-1 text-secondary'>(You)</span>
-                  )}
-                </p>
-                <p>Category: {note?.category}</p>
-                <p>Tags: {note?.tags.join(', ')}</p>
-                <p>Visibility: {note?.visibility}</p>
-                <p>Date Created: {formatDate(note?.createdAt)}</p>
-                <p>Last Modified: {formatDate(note?.lastModified)}</p>
-              </div>
-            </NoteActionModal>
-          )}
-          <ButtonGeneric
-            Icon={AiOutlineInfoCircle}
-            iconClassName='fill-secondary group-hover:fill-darker'
-            text='Details'
-            onClickHandler={(): void => setNoteDetailsModalOpen(true)}
-          />
+          <Popover className='relative'>
+            <Popover.Button className='group flex flex-row items-center p-2  focus:outline-none space-x-1'>
+              <AiOutlineInfoCircle className='w-5 h-5 fill-secondary group-hover:fill-darker' />
+              <p className='text-secondary group-hover:text-darker'>Details</p>
+            </Popover.Button>
+            <Popover.Panel className='w-72 mt-3 p-4 bg-white rounded shadow shadow-primary/50 left-1/2 z-10 -translate-x-1/2 transform absolute'>
+              {note && (
+                <>
+                  <h3 className='font-bold text-xl mb-1'>Details</h3>
+                  <p>
+                    Author: {owner?.username}
+                    {isOwner && (
+                      <span className='ml-1 text-secondary'>(You)</span>
+                    )}
+                  </p>
+                  <p>Category: {note?.category}</p>
+                  <p>Tags: {note?.tags.join(', ')}</p>
+                  <p>Visibility: {note?.visibility}</p>
+                  <p>Date Created: {formatDate(note?.createdAt)}</p>
+                  <p>Last Modified: {formatDate(note?.lastModified)}</p>
+                </>
+              )}
+            </Popover.Panel>
+          </Popover>
           {isOwner ? (
             <NoteTopbarIsOwner
               router={router}
