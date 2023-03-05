@@ -1,0 +1,103 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@200;300;400;500;600;700;800;900&family=Roboto:wght@100;200;300;400;500;600;700;800;900&display=swap');
+
+html,
+body {
+  position: relative;
+  scroll-behavior: smooth !important;
+}
+
+#__next {
+  position: relative;
+}
+
+.centered {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  /* bring your own prefixes */
+  transform: translate(-50%, -50%);
+}
+
+.ProseMirror {
+  %pm-heading {
+    @apply pt-2 pb-4;
+  }
+
+  %pm-list {
+    @apply list-inside;
+  }
+
+  /* Tiptap placeholder extension */
+  p.is-editor-empty:first-child::before {
+    color: #adb5bd;
+    content: attr(data-placeholder);
+    float: left;
+    height: 0;
+    pointer-events: none;
+  }
+
+  /* Prevent the text from being right below the marker*/
+  ul p,
+  ol p {
+    @apply inline-block;
+  }
+
+  /* Align the marker to the top due to the paragprah being an inline-block */
+  ul li *,
+  ol li * {
+    @apply align-top;
+  }
+
+  ul ul,
+  ul ol,
+  ol ul,
+  ol ol {
+    @apply ml-4;
+  }
+
+  .pm-paragraph:empty::before {
+    content: '';
+    @apply inline-block;
+  }
+
+  .pm-paragraph {
+    @apply my-1.5;
+  }
+
+  .pm-order-list {
+    @extend %pm-list;
+    @apply list-decimal;
+  }
+
+  .pm-bullet-list {
+    @extend %pm-list;
+    @apply list-disc;
+  }
+
+  .pm-heading-1 {
+    @extend %pm-heading;
+    @apply text-3xl;
+  }
+
+  .pm-heading-2 {
+    @extend %pm-heading;
+    @apply text-2xl;
+  }
+
+  .pm-heading-3 {
+    @extend %pm-heading;
+    @apply text-xl;
+  }
+
+  .pm-image-container {
+    @apply w-auto py-8 flex justify-center items-center;
+  }
+
+  .pm-image {
+    @apply w-full;
+  }
+}

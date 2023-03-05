@@ -8,17 +8,17 @@ const CustomStarterKit = StarterKit.configure({
   heading: false,
   bulletList: {
     HTMLAttributes: {
-      class: 'list-disc list-inside'
+      class: 'pm-bullet-list'
     }
   },
   orderedList: {
     HTMLAttributes: {
-      class: 'list-decimal list-inside'
+      class: 'pm-ordered-list'
     }
   },
   paragraph: {
     HTMLAttributes: {
-      class: 'my-1.5'
+      class: 'pm-paragraph'
     }
   }
 });
@@ -49,9 +49,9 @@ const CustomHeading = Heading.extend({
   levels: [1, 2, 3],
   HTMLAttributes: {
     headingClasses: {
-      1: 'pt-2 pb-4 text-2xl',
-      2: 'pt-2 pb-4 text-xl',
-      3: 'pt-2 pb-4 text-lg'
+      1: 'pm-heading-1',
+      2: 'pm-heading-2',
+      3: 'pm-heading-3'
     }
   }
 });
@@ -83,8 +83,8 @@ const CustomImage = Image.extend({
 }).configure({
   // This canbe accessed as this.options.HTMLAttributes
   HTMLAttributes: {
-    containerClass: 'w-auto py-8 flex justify-center items-center',
-    imageClass: 'h-full'
+    containerClass: 'pm-image-container',
+    imageClass: 'pm-image'
   }
 });
 
