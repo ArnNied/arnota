@@ -9,7 +9,7 @@ export default function Topbar({ children, align }: TopbarProps): JSX.Element {
   return (
     <div
       className={clsx(
-        'w-[inherit] h-12 flex flex-row items-center px-4 py-2 bg-light text-darker border-b border-secondary/50 shadow fixed',
+        'w-[inherit] h-12 flex flex-row items-center px-4 py-2 bg-light text-darker border-b border-secondary/50 shadow fixed z-20',
         {
           'justify-start': align === 'left',
           'justify-between': align === 'between',

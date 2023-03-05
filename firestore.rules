@@ -39,7 +39,7 @@ service cloud.firestore {
         && (data.owner is string)
         && (data.title is string && data.title.size() > 0)
         && (data.body is string && data.body.size() > 0)
-        && (data.plainBody is string && data.plainBody.size() > 0)
+        && (data.plainBody is string)
         && (data.category is string)
         && (data.visibility is string
           && (data.visibility == 'PUBLIC'

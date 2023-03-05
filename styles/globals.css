@@ -31,6 +31,12 @@ body {
   pointer-events: none;
 }
 
+/* Keep p height even when it's */
+.ProseMirror p:empty::before {
+  content: '';
+  @apply inline-block;
+}
+
 /* Prevent the text from being right below the marker*/
 .ProseMirror ul p,
 .ProseMirror ol p {

@@ -73,8 +73,8 @@ const NoteEditPage: NextPage = () => {
     const plainBody = editor?.getText() as string;
 
     const note: WithFieldValue<Partial<TNote>> = {
-      title: noteTitle,
-      category: noteCategory,
+      title: noteTitle.trim(),
+      category: noteCategory.trim(),
       tags: noteTags,
       body: JSON.stringify(body),
       plainBody: plainBody,

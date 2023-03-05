@@ -40,8 +40,8 @@ const NoteCreatePage: NextPage = () => {
 
     const _note: WithFieldValue<Omit<TNote, 'id'>> = {
       owner: authUser?.uid as string,
-      title: noteTitle,
-      category: noteCategory,
+      title: noteTitle.trim(),
+      category: noteCategory.trim(),
       tags: noteTags,
       body: JSON.stringify(body),
       plainBody: plainBody,

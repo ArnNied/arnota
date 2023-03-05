@@ -1,11 +1,13 @@
+import { Popover } from '@headlessui/react';
 import { EditorContent } from '@tiptap/react';
+import { useState } from 'react';
 import {
   AiOutlineBold,
   AiOutlineItalic,
   AiOutlineOrderedList,
   AiOutlineUnorderedList
 } from 'react-icons/ai';
-import { BiHeading } from 'react-icons/bi';
+import { BiHeading, BiImageAdd } from 'react-icons/bi';
 
 import TiptapExtensionButton from './TiptapExtensionButton';
 
@@ -16,6 +18,24 @@ type TiptapProps = {
 };
 
 export default function Tiptap({ editor }: TiptapProps): JSX.Element {
+  const [imagePrompt, setImagePrompt] = useState<{
+    url: string;
+    title: string;
+  }>({
+    url: '',
+    title: ''
+  });
+
+  function handleAddImage(e: React.FormEvent<HTMLFormElement>): void {
+    e.preventDefault();
+
+    if (imagePrompt.url) {
+      editor?.chain().focus().setImage({ src: imagePrompt.url }).run();
+    } else {
+      alert('Image URL is cannot be empty.');
+    }
+  }
+
   return (
     <div
       id='tiptap-editor-container'
@@ -75,6 +95,33 @@ export default function Tiptap({ editor }: TiptapProps): JSX.Element {
             editor?.chain().focus().toggleBulletList().run()
           }
         />
+        {/* Image extension */}
+        <Popover className='relative'>
+          <Popover.Button className='group inline-flex items-center p-2'>
+            <BiImageAdd className='w-6 h-6 fill-darker' />
+          </Popover.Button>
+          <Popover.Panel className='w-72 mt-3 p-2 bg-white rounded shadow shadow-primary/50 left-1/2 z-10 -translate-x-1/2 transform absolute'>
+            <form
+              onSubmit={handleAddImage}
+              className='w-full flex flex-row space-x-2'
+            >
+              <input
+                type='text'
+                placeholder='Image URL'
+                className='w-full px-2 py-1 border-b border-gray-500 focus:border-primary focus:outline-none'
+                onChange={(e): void =>
+                  setImagePrompt({ ...imagePrompt, url: e.target.value })
+                }
+              />
+              <button
+                type='submit'
+                className='px-4 py-1 bg-primary text-white rounded'
+              >
+                Add
+              </button>
+            </form>
+          </Popover.Panel>
+        </Popover>
       </div>
       <EditorContent editor={editor} />
     </div>

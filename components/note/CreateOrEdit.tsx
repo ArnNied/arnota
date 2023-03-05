@@ -102,7 +102,7 @@ export default function CreateOrEdit({
           placeholder='Title: Your Captivating Title'
           className='w-full py-1 bg-light font-bold text-2xl text-darker border-b-2 border-secondary focus:border-primary focus:outline-none'
           value={note.title.value}
-          onChange={(e): void => note.title.setter(e.target.value.trim())}
+          onChange={(e): void => note.title.setter(e.target.value.trimStart())}
         />
         <div className='flex flex-row space-x-4'>
           <input
@@ -110,7 +110,9 @@ export default function CreateOrEdit({
             placeholder='Category (optional)'
             className='w-72 py-1 bg-light text-darker border-b-2 border-secondary focus:border-primary focus:outline-none'
             value={note.category.value}
-            onChange={(e): void => note.category.setter(e.target.value.trim())}
+            onChange={(e): void =>
+              note.category.setter(e.target.value.trimStart())
+            }
           />
           <input
             type='text'
