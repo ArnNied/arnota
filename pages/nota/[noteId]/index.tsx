@@ -8,10 +8,8 @@ import { useEffect, useMemo, useState } from 'react';
 import { AiOutlineInfoCircle } from 'react-icons/ai';
 
 import MainLayout from '@/components/layouts/MainLayout';
-import NoteActionModal from '@/components/note/NoteActionModal';
 import NoteTopbarIsNotOwner from '@/components/note/NoteTopbarIsNotOwner';
 import NoteTopbarIsOwner from '@/components/note/NoteTopbarIsOwner';
-import ButtonGeneric from '@/components/shared/SharedButton';
 import Topbar from '@/components/shared/Topbar';
 import { notesCollection, usersCollection } from '@/lib/firebase/firestore';
 import { useInitializeState } from '@/lib/hooks';
@@ -38,8 +36,6 @@ const NoteDetailPage: NextPage = () => {
 
   const [note, setNote] = useState<TNote>();
   const [owner, setOwner] = useState<TUser | TAuthenticatedUser>();
-
-  const [noteDetailsModalOpen, setNoteDetailsModalOpen] = useState(false);
 
   const isOwner = useMemo(() => {
     if (!authenticatedUserSelector) return false;

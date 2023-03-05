@@ -8,6 +8,8 @@ import {
   AiOutlineUnorderedList
 } from 'react-icons/ai';
 import { BiHeading, BiImageAdd } from 'react-icons/bi';
+import { IoMdQuote } from 'react-icons/io';
+import { VscHorizontalRule } from 'react-icons/vsc';
 
 import TiptapExtensionButton from './TiptapExtensionButton';
 
@@ -93,6 +95,19 @@ export default function Tiptap({ editor }: TiptapProps): JSX.Element {
           isActive={editor?.isActive('bulletList')}
           onClickHandler={(): boolean | undefined =>
             editor?.chain().focus().toggleBulletList().run()
+          }
+        />
+        <TiptapExtensionButton
+          Icon={VscHorizontalRule}
+          onClickHandler={(): boolean | undefined =>
+            editor?.chain().focus().setHorizontalRule().run()
+          }
+        />
+        <TiptapExtensionButton
+          Icon={IoMdQuote}
+          isActive={editor?.isActive('blockquote')}
+          onClickHandler={(): boolean | undefined =>
+            editor?.chain().focus().toggleBlockquote().run()
           }
         />
         {/* Image extension */}

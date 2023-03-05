@@ -64,11 +64,12 @@ body {
     @apply inline-block;
   }
 
-  .pm-paragraph {
+  > .pm-paragraph,
+  .pm-blockquote > .pm-paragraph {
     @apply my-1.5;
   }
 
-  .pm-order-list {
+  .pm-ordered-list {
     @extend %pm-list;
     @apply list-decimal;
   }
@@ -99,5 +100,13 @@ body {
 
   .pm-image {
     @apply w-full;
+  }
+
+  .pm-horizontal-rule {
+    @apply my-4 border-t-2 border-darker;
+  }
+
+  .pm-blockquote {
+    @apply my-4 pl-4 border-l-2 border-darker;
   }
 }

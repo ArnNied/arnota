@@ -100,7 +100,7 @@ export default function CreateOrEdit({
         <input
           type='text'
           placeholder='Title: Your Captivating Title'
-          className='w-full py-1 bg-light font-bold text-2xl text-darker border-b-2 border-secondary focus:border-primary focus:outline-none'
+          className='w-full py-1 bg-light font-poppins font-bold text-2xl text-darker border-b-2 border-secondary focus:border-primary focus:outline-none'
           value={note.title.value}
           onChange={(e): void => note.title.setter(e.target.value.trimStart())}
         />
@@ -108,7 +108,7 @@ export default function CreateOrEdit({
           <input
             type='text'
             placeholder='Category (optional)'
-            className='w-72 py-1 bg-light text-darker border-b-2 border-secondary focus:border-primary focus:outline-none'
+            className='w-72 py-1 bg-light font-poppins text-darker border-b-2 border-secondary focus:border-primary focus:outline-none'
             value={note.category.value}
             onChange={(e): void =>
               note.category.setter(e.target.value.trimStart())
@@ -117,7 +117,7 @@ export default function CreateOrEdit({
           <input
             type='text'
             placeholder='Tags (optional, separate with comma)'
-            className='w-full py-1 bg-light text-darker border-b-2 border-secondary focus:border-primary focus:outline-none'
+            className='w-full py-1 bg-light font-poppins text-darker border-b-2 border-secondary focus:border-primary focus:outline-none'
             value={note.tags.value.map((tag) => tag.trim()).join(', ')}
             onChange={(e): void => note.tags.setter(e.target.value.split(', '))}
           />
