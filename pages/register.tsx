@@ -1,9 +1,10 @@
-import { createUserWithEmailAndPassword } from '@firebase/auth';
+import { createUserWithEmailAndPassword, deleteUser } from '@firebase/auth';
 import { doc, setDoc } from 'firebase/firestore';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useState } from 'react';
 
+import OtherProviderContainer from '@/components/auth/OtherProviderContainer';
 import AuthForbiddenMixin from '@/components/mixin/AuthForbiddenMixin';
 import InputWithLabel from '@/components/shared/InputWithLabel';
 import SharedButton from '@/components/shared/SharedButton';
@@ -66,7 +67,7 @@ const RegisterPage: NextPage = () => {
           error
         );
 
-        await registeredUser.user.delete();
+        await deleteUser(registeredUser.user);
       }
     } catch (err) {
       console.log('Error registering user', err);
@@ -85,9 +86,9 @@ const RegisterPage: NextPage = () => {
             Arnota
           </Link>
         </h1>
-        <div className='w-full max-w-[20rem] bg-white p-8 rounded shadow'>
+        <div className='w-full max-w-[20rem] bg-white p-8 rounded shadow space-y-4'>
           <h2 className='font-semibold text-2xl text-center'>Sign Up</h2>
-          <form onSubmit={handleSubmit} className='w-full mt-4'>
+          <form onSubmit={handleSubmit} className='w-full'>
             <div className='space-y-2'>
               <InputWithLabel
                 id='username'
@@ -117,14 +118,19 @@ const RegisterPage: NextPage = () => {
               inputType='submit'
               additionalContainerClassName='w-full mt-2'
             />
-            <div className='my-4 border'></div>
-            <p className='font-semibold'>
-              Already have an account?{' '}
-              <Link href='/login' className='text-primary'>
-                Sign In
-              </Link>
-            </p>
           </form>
+          <OtherProviderContainer
+            router={router}
+            dispatcher={dispatch}
+            isRegistering={true}
+          />
+          <div className='border'></div>
+          <p className='font-semibold'>
+            Already have an account?{' '}
+            <Link href='/login' className='text-primary'>
+              Sign In
+            </Link>
+          </p>
         </div>
       </div>
     </AuthForbiddenMixin>

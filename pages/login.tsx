@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useState } from 'react';
 
+import OtherProviderContainer from '@/components/auth/OtherProviderContainer';
 import AuthForbiddenMixin from '@/components/mixin/AuthForbiddenMixin';
 import InputWithLabel from '@/components/shared/InputWithLabel';
 import SharedButton from '@/components/shared/SharedButton';
@@ -56,9 +57,9 @@ const LoginPage: NextPage = () => {
             Arnota
           </Link>
         </h1>
-        <div className='w-full max-w-[20rem] bg-white p-8 rounded shadow'>
+        <div className='w-full max-w-[20rem] bg-white p-8 rounded shadow space-y-4'>
           <h2 className='font-semibold text-2xl text-center'>Sign In</h2>
-          <form onSubmit={handleSubmit} className='w-full mt-4'>
+          <form onSubmit={handleSubmit} className='w-full'>
             <div className='space-y-2'>
               <InputWithLabel
                 id='email'
@@ -82,14 +83,19 @@ const LoginPage: NextPage = () => {
               inputType='submit'
               additionalContainerClassName='w-full mt-2'
             />
-            <div className='my-4 border'></div>
-            <p className='font-semibold'>
-              New to Arnota?{' '}
-              <Link href='/register' className='text-primary'>
-                Create an account
-              </Link>
-            </p>
           </form>
+          <OtherProviderContainer
+            router={router}
+            dispatcher={dispatch}
+            isRegistering={false}
+          />
+          <div className='border'></div>
+          <p className='font-semibold'>
+            New to Arnota?{' '}
+            <Link href='/register' className='text-primary'>
+              Create an account
+            </Link>
+          </p>
         </div>
       </div>
     </AuthForbiddenMixin>
