@@ -1,6 +1,6 @@
 import { doc, deleteDoc } from 'firebase/firestore';
 import { useState } from 'react';
-import { AiFillEdit, AiFillDelete } from 'react-icons/ai';
+import { AiFillDelete } from 'react-icons/ai';
 
 import { notesCollection } from '@/lib/firebase/firestore';
 import { deletePersonalNote } from '@/store/slices/personalNotesSlice';
@@ -62,12 +62,12 @@ export default function NoteTopbarIsOwner({
         </div>
       </NoteActionModal>
 
-      <SharedButton
+      {/* <SharedButton
         Icon={AiFillEdit}
         iconClassName='fill-darker/50 group-hover:fill-darker'
         text='Edit'
         href={`/nota/${note.id}/edit`}
-      />
+      /> */}
       <SharedButton
         Icon={AiFillDelete}
         iconClassName='fill-red-600/50 group-hover:fill-red-600'

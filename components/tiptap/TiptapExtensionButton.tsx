@@ -7,7 +7,7 @@ type TiptapExtensionButtonProps = {
   textBefore?: string;
   textAfter?: string;
   isActive?: boolean;
-  onClickHandler: () => boolean | undefined;
+  onClickHandler?: () => boolean | undefined;
 };
 
 export default function TiptapExtensionButton({
@@ -21,7 +21,7 @@ export default function TiptapExtensionButton({
     <button
       type='button'
       onClick={onClickHandler}
-      className='flex flex-row items-center p-2 hover:bg-secondary/50 rounded active:bg-secondary'
+      className='w-8 h-8 flex flex-row justify-center items-center hover:bg-secondary/50 active:bg-secondary rounded'
     >
       {textBefore && (
         <span

@@ -53,28 +53,38 @@ service cloud.firestore {
         && (data.lastModified is timestamp)
     }
 
-    function noteCreate() {
-      return isValidNoteStructure(incomingData())
+    function isValidTags(tags) {
+      // Prevent empty tags
+      return !([''] in tags)
+
+          // Prevent duplicate tags
+          && tags.toSet().size() == tags.size()
+    }
+
+    function noteCreate(data) {
+      return isValidNoteStructure(data)
 
             // Ensure that the note is not favorited by anyone
             // On creation
-            && incomingData().favoritedBy.size() == 0
+            && data.favoritedBy.size() == 0
 
             // Ensure that the owner field is the authenticated user
             // This is to prevent the user from creating a note with
             // Another user's uid
-            && incomingData().owner == request.auth.uid
+            && data.owner == request.auth.uid
+
+            && isValidTags(data.tags)
     }
 
-    function noteUpdate() {
-      return isValidNoteStructure(incomingData())
+    function noteUpdate(data) {
+      return isValidNoteStructure(data)
             && isOwner()
 
             // Ensure it is not a favorite action
-            && !actionNoteFavorite(incomingData())
+            && !actionNoteFavorite(data)
 
             // Ensure that it doesnn't modify unintended fields
-            && incomingData().diff(existingData()).affectedKeys().hasOnly([
+            && data.diff(existingData()).affectedKeys().hasOnly([
               'title',
               'body',
               'plainBody',
@@ -83,6 +93,9 @@ service cloud.firestore {
               'tags',
               'lastModified'
               ])
+
+            && isValidTags(data.tags)
+
     }
 
     function actionNoteFavorite(data) {
@@ -133,11 +146,11 @@ service cloud.firestore {
       allow get: if isOwner() || existingData().visibility != 'PRIVATE'
 
       allow create: if isAuthenticated()
-                  && noteCreate()
+                  && noteCreate(incomingData())
 
       allow update: if isValidNoteStructure(incomingData())
                   && (
-                    noteUpdate()
+                    noteUpdate(incomingData())
                     || actionNoteFavorite(incomingData())
                     )
 

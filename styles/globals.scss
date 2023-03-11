@@ -22,6 +22,11 @@ body {
   transform: translate(-50%, -50%);
 }
 
+.arnota-note-title:empty::before {
+  content: '';
+  @apply inline-block;
+}
+
 .ProseMirror {
   %pm-heading {
     @apply pt-2 pb-4;
@@ -66,7 +71,7 @@ body {
 
   > .pm-paragraph,
   .pm-blockquote > .pm-paragraph {
-    @apply my-1.5;
+    @apply my-2;
   }
 
   .pm-ordered-list {

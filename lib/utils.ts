@@ -10,6 +10,7 @@ import {
 import { setAuthenticatedUser } from '@/store/slices/authenticatedUserSlice';
 import { setPersonalNotes } from '@/store/slices/personalNotesSlice';
 
+import { NOTE_TAGS_SEPARATOR } from './config';
 import { notesCollection, usersCollection } from './firebase/firestore';
 
 import type { useAppDispatch } from '@/store/hooks';
@@ -38,6 +39,22 @@ export function simplifyNoteData(note: TNote): TNote {
     createdAt: { ...note.createdAt } as PlainTimestamp,
     lastModified: { ...note.lastModified } as PlainTimestamp
   };
+}
+
+export function convertTagsStringToList(tags: string): string[] {
+  return tags.split(NOTE_TAGS_SEPARATOR).map((tag) => tag.trim());
+}
+
+export function convertTagsListToString(tags: string[]): string {
+  return tags.join(NOTE_TAGS_SEPARATOR);
+}
+
+export function sanitizeNoteTags(tags: string[]): string[] {
+  return tags
+    .map((tag) => tag.replace(/\s/g, ''))
+    .filter(
+      (tag, index, self) => self.indexOf(tag) === index && tag.length > 0
+    );
 }
 
 // Populate the store with the user's notes

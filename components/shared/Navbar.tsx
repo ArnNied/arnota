@@ -1,18 +1,31 @@
 import 'simplebar-react/dist/simplebar.min.css';
 
+import { generateJSON } from '@tiptap/core';
 import { signOut } from 'firebase/auth';
+import { addDoc, getDoc, serverTimestamp } from 'firebase/firestore';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import SimpleBar from 'simplebar-react';
 import slugify from 'slugify';
 
 import { auth } from '@/lib/firebase/core';
+import { notesCollection } from '@/lib/firebase/firestore';
+import { useInitializeState } from '@/lib/hooks';
+import { configuredExtension } from '@/lib/tiptap';
+import { simplifyNoteData } from '@/lib/utils';
 import { useAppDispatch } from '@/store/hooks';
 import { clearAuthenticatedUser } from '@/store/slices/authenticatedUserSlice';
 import { clearFavorites } from '@/store/slices/favoritedNotesSlice';
-import { clearPersonalNotes } from '@/store/slices/personalNotesSlice';
+import {
+  addPersonalNote,
+  clearPersonalNotes
+} from '@/store/slices/personalNotesSlice';
+import { ENoteVisibility } from '@/types/note';
 
-import NavbarLink from './NavbarLink';
+import NavbarButton from './NavbarButton';
+
+import type { TNote } from '@/types/note';
+import type { WithFieldValue } from 'firebase/firestore';
 
 type NavbarProps = {
   categories?: string[];
@@ -21,6 +34,8 @@ type NavbarProps = {
 export default function Navbar({ categories }: NavbarProps): JSX.Element {
   const router = useRouter();
   const dispatch = useAppDispatch();
+
+  const { authUser } = useInitializeState();
 
   async function handleLogout(): Promise<void> {
     try {
@@ -36,6 +51,47 @@ export default function Navbar({ categories }: NavbarProps): JSX.Element {
     }
   }
 
+  async function handleCreate(): Promise<void> {
+    if (!authUser) {
+      console.log('User is not authenticated');
+
+      await router.push('/login');
+      return;
+    }
+
+    try {
+      const newNoteDocRef = await addDoc(notesCollection, {
+        title: 'Untitled',
+        category: '',
+        tags: [],
+        body: JSON.stringify(generateJSON('', configuredExtension)),
+        plainBody: '',
+        owner: authUser?.uid,
+        visibility: ENoteVisibility.PRIVATE,
+        favoritedBy: [],
+        createdAt: serverTimestamp(),
+        lastModified: serverTimestamp()
+      } as WithFieldValue<Omit<TNote, 'id'>>);
+
+      if (newNoteDocRef.id) {
+        const newNoteDocSnap = await getDoc(newNoteDocRef);
+
+        if (newNoteDocSnap.exists()) {
+          const newNoteDocData = simplifyNoteData(
+            newNoteDocSnap.data() as TNote
+          );
+          dispatch(addPersonalNote(newNoteDocData));
+
+          await router.push(`/nota/${newNoteDocRef.id}`);
+        } else {
+          throw new Error('Failed to create new note');
+        }
+      }
+    } catch (error) {
+      console.log('Failed to create new note', error);
+    }
+  }
+
   return (
     <nav className='w-1/5 h-screen flex flex-col bg-primary fixed'>
       <Link href='/'>
@@ -45,16 +101,16 @@ export default function Navbar({ categories }: NavbarProps): JSX.Element {
       </Link>
       <div className='h-full min-h-0 flex flex-col mx-4'>
         <div className=''>
-          <NavbarLink href='/' text='Home' />
-          <NavbarLink href='/create' text='New Note' />
-          <NavbarLink href='/browse' text='Browse' />
-          <NavbarLink href='/favorites' text='Favorites' />
+          <NavbarButton text='Home' href='/' />
+          <NavbarButton text='New Note' onClickHandler={handleCreate} />
+          <NavbarButton text='Browse' href='/browse' />
+          <NavbarButton text='Favorites' href='/favorites' />
         </div>
         {categories && categories.length !== 0 && (
           <div className='h-full min-h-0 my-4'>
             <SimpleBar className='h-full'>
               {categories.map((category) => (
-                <NavbarLink
+                <NavbarButton
                   key={category}
                   href={`/category/${slugify(category)}`}
                   text={category}
@@ -64,14 +120,9 @@ export default function Navbar({ categories }: NavbarProps): JSX.Element {
           </div>
         )}
         <div className='mt-auto mb-4 pt-4 border-t space-y-1'>
-          <NavbarLink href='/profile' text='Profile' />
-          <NavbarLink href='/settings' text='Settings' />
-          <button
-            onClick={handleLogout}
-            className='w-full py-0.5 px-2 hover:bg-secondary/70 text-light text-right rounded inline-block'
-          >
-            Logout
-          </button>
+          <NavbarButton href='/profile' text='Profile' />
+          <NavbarButton href='/settings' text='Settings' />
+          <NavbarButton onClickHandler={handleLogout}>Logout</NavbarButton>
         </div>
       </div>
     </nav>

@@ -110,7 +110,7 @@ export const configuredEditor = {
   editorProps: {
     attributes: {
       class:
-        'min-h-[10rem] px-2 pt-2 pb-8 font-poppins rounded focus:outline-none editor-output'
+        'min-h-[10rem] pb-8 font-poppins rounded focus:outline-none editor-output'
     }
   },
   onFocus: (): void => {
