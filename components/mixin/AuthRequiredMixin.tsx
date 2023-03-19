@@ -1,21 +1,18 @@
+import { useRouter } from 'next/router';
 import { useEffect } from 'react';
 
-import type { User } from 'firebase/auth';
-import type { NextRouter } from 'next/router';
+import { useInitializeState } from '@/lib/context/AuthContextProvider';
 
 type AuthRequiredMixinProps = {
   children: JSX.Element | JSX.Element[];
-  authUserLoading: boolean;
-  authUser: User | null | undefined;
-  router: NextRouter;
 };
 
 export default function AuthRequiredMixin({
-  children,
-  authUserLoading,
-  authUser,
-  router
+  children
 }: AuthRequiredMixinProps): JSX.Element {
+  const router = useRouter();
+  const { authUser, authUserLoading } = useInitializeState();
+
   useEffect(() => {
     console.log('1');
     if (authUserLoading || !router.isReady) return;

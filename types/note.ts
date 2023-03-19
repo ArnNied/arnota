@@ -24,3 +24,8 @@ export type TNote = {
   createdAt: Timestamp | PlainTimestamp;
   lastModified: Timestamp | PlainTimestamp;
 };
+
+export type TEditableNote = Pick<
+  TNote,
+  'title' | 'body' | 'category' | 'tags' | 'visibility'
+>;

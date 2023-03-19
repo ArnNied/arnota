@@ -8,7 +8,6 @@ import AuthForbiddenMixin from '@/components/mixin/AuthForbiddenMixin';
 import InputWithLabel from '@/components/shared/InputWithLabel';
 import SharedButton from '@/components/shared/SharedButton';
 import { auth } from '@/lib/firebase/core';
-import { useInitializeState } from '@/lib/hooks';
 import { setAuthenticatedUserFunction } from '@/lib/utils';
 import { useAppDispatch } from '@/store/hooks';
 
@@ -17,8 +16,6 @@ import type { NextPage } from 'next';
 const LoginPage: NextPage = () => {
   const router = useRouter();
   const dispatch = useAppDispatch();
-
-  const { authUserLoading, authUser } = useInitializeState();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -46,11 +43,7 @@ const LoginPage: NextPage = () => {
   }
 
   return (
-    <AuthForbiddenMixin
-      authUserLoading={authUserLoading}
-      authUser={authUser}
-      router={router}
-    >
+    <AuthForbiddenMixin>
       <div className='h-screen flex flex-col items-center justify-center'>
         <h1 className='w-fit p-4 font-bold text-4xl text-primary text-center'>
           <Link href='/' className='block p-4'>

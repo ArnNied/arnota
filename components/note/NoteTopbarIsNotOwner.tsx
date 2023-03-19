@@ -7,6 +7,7 @@ import {
   serverTimestamp,
   getDoc
 } from 'firebase/firestore';
+import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import {
   AiFillHeart,
@@ -18,6 +19,7 @@ import {
 import { HiShare } from 'react-icons/hi';
 
 import { notesCollection } from '@/lib/firebase/firestore';
+import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import {
   deleteFavorite,
   addFavorite
@@ -28,25 +30,23 @@ import SharedButton from '../shared/SharedButton';
 
 import NoteActionModal from './NoteActionModal';
 
-import type { useAppDispatch } from '@/store/hooks';
 import type { TNote } from '@/types/note';
-import type { TAuthenticatedUser } from '@/types/user';
 import type { WithFieldValue } from 'firebase/firestore';
-import type { NextRouter } from 'next/router';
 
 type NoteTopbarIsOwnerProps = {
-  router: NextRouter;
-  dispatcher: ReturnType<typeof useAppDispatch>;
   note: TNote;
-  authenticatedUserSelector: TAuthenticatedUser;
 };
 
 export default function NoteTopbarIsNotOwner({
-  router,
-  dispatcher,
-  note,
-  authenticatedUserSelector
+  note
 }: NoteTopbarIsOwnerProps): JSX.Element {
+  const router = useRouter();
+  const dispatch = useAppDispatch();
+
+  const authenticatedUserSelector = useAppSelector(
+    (state) => state.authenticatedUser
+  );
+
   const [favorited, setFavorited] = useState(false);
   const [shareModalOpen, setShareModalOpen] = useState(false);
   const [duplicateModalOpen, setuplicateModalOpen] = useState(false);
@@ -64,7 +64,7 @@ export default function NoteTopbarIsNotOwner({
           favoritedBy: arrayRemove(authenticatedUserSelector.uid)
         });
 
-        dispatcher(deleteFavorite(note?.id));
+        dispatch(deleteFavorite(note?.id));
 
         setFavorited(false);
       } catch (err) {
@@ -77,7 +77,7 @@ export default function NoteTopbarIsNotOwner({
           favoritedBy: arrayUnion(authenticatedUserSelector.uid)
         });
 
-        dispatcher(addFavorite(note));
+        dispatch(addFavorite(note));
 
         setFavorited(true);
       } catch (err) {
@@ -109,12 +109,12 @@ export default function NoteTopbarIsNotOwner({
       if (newDocRef.id && newDocSnap.exists()) {
         const newDocData = newDocSnap.data() as TNote;
 
-        dispatcher(addPersonalNote(newDocData));
+        dispatch(addPersonalNote(newDocData));
 
         // TODO: Fix this hacky solution
         // This is a hacky solution to the problem of the router not
         // updating the page after the push. The problem is that the
-        // router is not updating the page because the dispatcher
+        // router is not updating the page because the dispatch
         // is not finished updating the store.
         setTimeout(() => {
           router.push(`/nota/${newDocRef.id}`).catch((err) => {

@@ -8,9 +8,9 @@ import { useRouter } from 'next/router';
 import SimpleBar from 'simplebar-react';
 import slugify from 'slugify';
 
+import { useInitializeState } from '@/lib/context/AuthContextProvider';
 import { auth } from '@/lib/firebase/core';
 import { notesCollection } from '@/lib/firebase/firestore';
-import { useInitializeState } from '@/lib/hooks';
 import { configuredExtension } from '@/lib/tiptap';
 import { simplifyNoteData } from '@/lib/utils';
 import { useAppDispatch } from '@/store/hooks';
@@ -27,15 +27,11 @@ import NavbarButton from './NavbarButton';
 import type { TNote } from '@/types/note';
 import type { WithFieldValue } from 'firebase/firestore';
 
-type NavbarProps = {
-  categories?: string[];
-};
-
-export default function Navbar({ categories }: NavbarProps): JSX.Element {
+export default function Navbar(): JSX.Element {
   const router = useRouter();
   const dispatch = useAppDispatch();
 
-  const { authUser } = useInitializeState();
+  const { authUser, personalNotesSelector } = useInitializeState();
 
   async function handleLogout(): Promise<void> {
     try {
@@ -106,10 +102,10 @@ export default function Navbar({ categories }: NavbarProps): JSX.Element {
           <NavbarButton text='Browse' href='/browse' />
           <NavbarButton text='Favorites' href='/favorites' />
         </div>
-        {categories && categories.length !== 0 && (
+        {personalNotesSelector.categories.length !== 0 && (
           <div className='h-full min-h-0 my-4'>
             <SimpleBar className='h-full'>
-              {categories.map((category) => (
+              {personalNotesSelector.categories.map((category) => (
                 <NavbarButton
                   key={category}
                   href={`/category/${slugify(category)}`}
@@ -122,7 +118,7 @@ export default function Navbar({ categories }: NavbarProps): JSX.Element {
         <div className='mt-auto mb-4 pt-4 border-t space-y-1'>
           <NavbarButton href='/profile' text='Profile' />
           <NavbarButton href='/settings' text='Settings' />
-          <NavbarButton onClickHandler={handleLogout}>Logout</NavbarButton>
+          <NavbarButton onClickHandler={handleLogout} text='Logout' />
         </div>
       </div>
     </nav>

@@ -4,14 +4,14 @@ type NavbarButtonProps = {
   text?: string;
   href?: string;
   onClickHandler?: () => void;
-  children?: React.ReactNode;
 };
 
+const navbarButtonClassName =
+  'w-full py-0.5 px-2 hover:bg-secondary/70 text-light text-right rounded inline-block break-words';
 export default function NavbarButton({
   text,
   href,
-  onClickHandler,
-  children
+  onClickHandler
 }: NavbarButtonProps): JSX.Element {
   if (!href && !onClickHandler) {
     throw new Error(
@@ -25,20 +25,14 @@ export default function NavbarButton({
 
   if (href) {
     return (
-      <Link
-        href={href}
-        className='w-full py-0.5 px-2 hover:bg-secondary/70 text-light text-right rounded inline-block break-words'
-      >
-        {text ?? children}
+      <Link href={href} className={navbarButtonClassName}>
+        {text}
       </Link>
     );
   } else {
     return (
-      <button
-        onClick={onClickHandler}
-        className='w-full py-0.5 px-2 hover:bg-secondary/70 text-light text-right rounded inline-block break-words'
-      >
-        {text ?? children}
+      <button onClick={onClickHandler} className={navbarButtonClassName}>
+        {text}
       </button>
     );
   }

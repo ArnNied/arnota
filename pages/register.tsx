@@ -10,7 +10,6 @@ import InputWithLabel from '@/components/shared/InputWithLabel';
 import SharedButton from '@/components/shared/SharedButton';
 import { auth } from '@/lib/firebase/core';
 import { usersCollection } from '@/lib/firebase/firestore';
-import { useInitializeState } from '@/lib/hooks';
 import { setAuthenticatedUserFunction } from '@/lib/utils';
 import { useAppDispatch } from '@/store/hooks';
 
@@ -20,8 +19,6 @@ import type { NextPage } from 'next';
 const RegisterPage: NextPage = () => {
   const router = useRouter();
   const dispatch = useAppDispatch();
-
-  const { authUserLoading, authUser } = useInitializeState();
 
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
@@ -75,11 +72,7 @@ const RegisterPage: NextPage = () => {
   }
 
   return (
-    <AuthForbiddenMixin
-      authUserLoading={authUserLoading}
-      authUser={authUser}
-      router={router}
-    >
+    <AuthForbiddenMixin>
       <div className='h-screen flex flex-col items-center justify-center'>
         <h1 className='w-fit p-4 font-bold text-4xl text-primary text-center'>
           <Link href='/' className='block p-4'>

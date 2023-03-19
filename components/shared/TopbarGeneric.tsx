@@ -5,7 +5,10 @@ type TopbarProps = {
   align: 'left' | 'between' | 'right';
 };
 
-export default function Topbar({ children, align }: TopbarProps): JSX.Element {
+export default function TopbarGeneric({
+  children,
+  align
+}: TopbarProps): JSX.Element {
   return (
     <div
       className={clsx(

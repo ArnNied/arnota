@@ -49,14 +49,6 @@ export function convertTagsListToString(tags: string[]): string {
   return tags.join(NOTE_TAGS_SEPARATOR);
 }
 
-export function sanitizeNoteTags(tags: string[]): string[] {
-  return tags
-    .map((tag) => tag.replace(/\s/g, ''))
-    .filter(
-      (tag, index, self) => self.indexOf(tag) === index && tag.length > 0
-    );
-}
-
 // Populate the store with the user's notes
 // and set the authenticated user in case of a refresh
 export async function isLoggedIn(

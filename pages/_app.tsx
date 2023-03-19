@@ -3,6 +3,7 @@ import '@/styles/globals.scss';
 import Head from 'next/head';
 import { Provider } from 'react-redux';
 
+import AuthContextProvider from '@/lib/context/AuthContextProvider';
 import { store } from '@/store/store';
 
 import type { AppProps } from 'next/app';
@@ -15,7 +16,9 @@ export default function MyApp({ Component, pageProps }: AppProps): JSX.Element {
         <title>Arnota</title>
       </Head>
       <Provider store={store}>
-        <Component {...pageProps} />
+        <AuthContextProvider>
+          <Component {...pageProps} />
+        </AuthContextProvider>
       </Provider>
     </>
   );

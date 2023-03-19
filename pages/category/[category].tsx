@@ -5,7 +5,7 @@ import MainLayout from '@/components/layouts/MainLayout';
 import AuthRequiredMixin from '@/components/mixin/AuthRequiredMixin';
 import NoteList from '@/components/note/NoteList';
 import SearchField from '@/components/shared/SearchField';
-import { useInitializeState } from '@/lib/hooks';
+import { useInitializeState } from '@/lib/context/AuthContextProvider';
 
 import type { TNote } from '@/types/note';
 import type { NextPage } from 'next';

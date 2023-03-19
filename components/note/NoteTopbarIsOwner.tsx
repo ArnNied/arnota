@@ -1,29 +1,28 @@
 import { doc, deleteDoc } from 'firebase/firestore';
+import { useRouter } from 'next/router';
 import { useState } from 'react';
 import { AiFillDelete } from 'react-icons/ai';
 
 import { notesCollection } from '@/lib/firebase/firestore';
+import { useAppDispatch } from '@/store/hooks';
 import { deletePersonalNote } from '@/store/slices/personalNotesSlice';
 
 import SharedButton from '../shared/SharedButton';
 
 import NoteActionModal from './NoteActionModal';
 
-import type { useAppDispatch } from '@/store/hooks';
 import type { TNote } from '@/types/note';
-import type { NextRouter } from 'next/router';
 
 type NoteTopbarIsOwnerProps = {
-  router: NextRouter;
-  dispatcher: ReturnType<typeof useAppDispatch>;
   note: TNote;
 };
 
 export default function NoteTopbarIsOwner({
-  router,
-  dispatcher,
   note
 }: NoteTopbarIsOwnerProps): JSX.Element {
+  const router = useRouter();
+  const dispatch = useAppDispatch();
+
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
 
   async function handleDelete(): Promise<void> {
@@ -32,7 +31,7 @@ export default function NoteTopbarIsOwner({
     try {
       await deleteDoc(noteDocRef);
 
-      dispatcher(deletePersonalNote(note.id));
+      dispatch(deletePersonalNote(note.id));
 
       await router.push('/');
     } catch (err) {

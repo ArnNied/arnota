@@ -1,59 +1,29 @@
-import { Combobox, Listbox, Popover } from '@headlessui/react';
 import { useEditor } from '@tiptap/react';
-import { clsx } from 'clsx';
 import { doc, getDoc, serverTimestamp, updateDoc } from 'firebase/firestore';
 import { useRouter } from 'next/router';
-import { useEffect, useId, useMemo, useState } from 'react';
-import {
-  AiFillEye,
-  AiOutlineEye,
-  AiOutlineEyeInvisible,
-  AiOutlineInfoCircle
-} from 'react-icons/ai';
-import { HiOutlineChevronDown } from 'react-icons/hi';
+import { useEffect, useMemo, useState } from 'react';
 
 import MainLayout from '@/components/layouts/MainLayout';
-import NoteTopbarIsNotOwner from '@/components/note/NoteTopbarIsNotOwner';
-import NoteTopbarIsOwner from '@/components/note/NoteTopbarIsOwner';
-import Topbar from '@/components/shared/Topbar';
+import ExpandableInput from '@/components/note/ExpandableInput';
+import NoteDetailTopbar from '@/components/note/NoteDetailTopbar';
 import Tiptap from '@/components/tiptap/Tiptap';
-import { NOTE_CATEGORY_MAX_LENGTH } from '@/lib/config';
+import { NOTE_CATEGORY_MAX_LENGTH, NOTE_TITLE_MAX_LENGTH } from '@/lib/config';
+import { useInitializeState } from '@/lib/context/AuthContextProvider';
 import { notesCollection, usersCollection } from '@/lib/firebase/firestore';
-import { useInitializeState } from '@/lib/hooks';
 import { configuredEditor } from '@/lib/tiptap';
 import {
   convertTagsListToString,
   convertTagsStringToList,
-  formatDate,
-  sanitizeNoteTags,
   simplifyNoteData
 } from '@/lib/utils';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { updatePersonalNote } from '@/store/slices/personalNotesSlice';
 import { ENoteVisibility } from '@/types/note';
 
-import type { TNote } from '@/types/note';
+import type { TNote, TEditableNote } from '@/types/note';
 import type { TAuthenticatedUser, TUser } from '@/types/user';
 import type { Content } from '@tiptap/core';
 import type { NextPage } from 'next';
-
-const NoteVisibilityIconMap = {
-  [ENoteVisibility.PUBLIC]: (
-    <AiFillEye size='1.25em' className='fill-darker group-hover:fill-white' />
-  ),
-  [ENoteVisibility.LIMITED]: (
-    <AiOutlineEye
-      size='1.25em'
-      className='fill-darker group-hover:fill-white'
-    />
-  ),
-  [ENoteVisibility.PRIVATE]: (
-    <AiOutlineEyeInvisible
-      size='1.25em'
-      className='fill-darker group-hover:fill-white'
-    />
-  )
-};
 
 const NoteDetailPage: NextPage = () => {
   const router = useRouter();
@@ -69,7 +39,7 @@ const NoteDetailPage: NextPage = () => {
   const editor = useEditor({
     ...configuredEditor,
     onUpdate: ({ editor }) => {
-      setEditedNote((prev) => {
+      setEditableNote((prev) => {
         return {
           ...prev,
           body: JSON.stringify(editor.getJSON())
@@ -78,17 +48,12 @@ const NoteDetailPage: NextPage = () => {
     }
   });
 
-  const noteCategoryInputId = useId();
-  const noteTagsInputId = useId();
-
   const { noteId } = router.query;
 
   const [owner, setOwner] = useState<TUser | TAuthenticatedUser>();
   const [originalNote, setOriginalNote] = useState<TNote>();
 
-  const [editedNote, setEditedNote] = useState<
-    Pick<TNote, 'title' | 'category' | 'tags' | 'body' | 'visibility'>
-  >({
+  const [editableNote, setEditableNote] = useState<TEditableNote>({
     title: '',
     category: '',
     tags: [],
@@ -97,11 +62,11 @@ const NoteDetailPage: NextPage = () => {
   });
 
   const filteredCategories = (): string[] => {
-    if (editedNote.category === '') {
+    if (editableNote.category === '') {
       return personalNotesSelector.categories;
     } else {
       return personalNotesSelector.categories.filter((category) =>
-        category.toLowerCase().includes(editedNote.category.toLowerCase())
+        category.toLowerCase().includes(editableNote.category.toLowerCase())
       );
     }
   };
@@ -117,7 +82,7 @@ const NoteDetailPage: NextPage = () => {
       .flat()
       .filter((value, index, self) => self.indexOf(value) === index);
 
-    if (editedNote.tags.length === 0) {
+    if (editableNote.tags.length === 0) {
       return flattened;
     } else {
       // Return matching tags according to the last tag input
@@ -127,9 +92,9 @@ const NoteDetailPage: NextPage = () => {
           tag
             .toLowerCase()
             .includes(
-              editedNote.tags[editedNote.tags.length - 1].toLowerCase()
+              editableNote.tags[editableNote.tags.length - 1].toLowerCase()
             ) &&
-          !editedNote.tags
+          !editableNote.tags
             .map((tag) => tag.toLowerCase())
             .includes(tag.toLowerCase())
       );
@@ -157,7 +122,7 @@ const NoteDetailPage: NextPage = () => {
     if (isAnOwnedNote) {
       setOwner(authenticatedUserSelector);
       setOriginalNote(isAnOwnedNote);
-      setEditedNote({
+      setEditableNote({
         title: isAnOwnedNote.title,
         category: isAnOwnedNote.category,
         tags: isAnOwnedNote.tags,
@@ -175,7 +140,7 @@ const NoteDetailPage: NextPage = () => {
             const noteDocData = simplifyNoteData(noteDoc.data());
 
             setOriginalNote(noteDocData);
-            setEditedNote({
+            setEditableNote({
               title: noteDocData.title,
               category: noteDocData.category,
               tags: noteDocData.tags,
@@ -218,11 +183,11 @@ const NoteDetailPage: NextPage = () => {
 
   useEffect(() => {
     const hasBeenEdited =
-      originalNote?.title !== editedNote.title ||
-      originalNote?.category !== editedNote.category ||
-      originalNote?.tags !== editedNote.tags ||
-      originalNote?.visibility !== editedNote.visibility ||
-      originalNote?.body !== editedNote.body;
+      originalNote?.title !== editableNote.title ||
+      originalNote?.category !== editableNote.category ||
+      originalNote?.tags !== editableNote.tags ||
+      originalNote?.visibility !== editableNote.visibility ||
+      originalNote?.body !== editableNote.body;
 
     if (!originalNote || !hasBeenEdited) return;
 
@@ -230,17 +195,24 @@ const NoteDetailPage: NextPage = () => {
 
     const saveNoteTimeout = setTimeout(() => {
       const sanitizedTitle =
-        editedNote.title.trim().slice(0, 128) || 'Untitled';
-      const sanitizedCategory = editedNote.category.trim().slice(0, 32);
-      const sanitizedTags = sanitizeNoteTags(editedNote.tags);
+        editableNote.title.trim().slice(0, NOTE_TITLE_MAX_LENGTH) || 'Untitled';
+      const sanitizedCategory = editableNote.category
+        .trim()
+        .slice(0, NOTE_CATEGORY_MAX_LENGTH);
+      const sanitizedTags = editableNote.tags
+        .map((tag) => tag.replace(/\s/g, ''))
+        // Remove duplicate tags
+        .filter(
+          (tag, index, self) => self.indexOf(tag) === index && tag.length > 0
+        );
 
       updateDoc(doc(notesCollection, noteId as string), {
         title: sanitizedTitle,
         category: sanitizedCategory,
         tags: sanitizedTags,
-        body: editedNote.body,
+        body: editableNote.body,
         plainBody: editor?.getText(),
-        visibility: editedNote.visibility,
+        visibility: editableNote.visibility,
         lastModified: serverTimestamp()
       })
         .then(() => {
@@ -268,120 +240,17 @@ const NoteDetailPage: NextPage = () => {
       clearTimeout(saveNoteTimeout);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [editedNote]);
+  }, [editableNote]);
 
   return (
     <MainLayout navbarCategories={personalNotesSelector.categories}>
-      <Topbar align='between'>
-        <p className='text-darker'>
-          By: {owner?.username}
-          {isOwner && <span className='ml-1 text-secondary'>(You)</span>}
-        </p>
-        <div className='flex flex-row items-center space-x-2'>
-          {isOwner && (
-            <Listbox value={editedNote.visibility}>
-              <div className='relative'>
-                <Listbox.Button className='w-28 flex flex-row items-center justify-between p-1 text-start rounded'>
-                  <div className='flex flex-row items-center text-darker'>
-                    <span className='mr-1'>
-                      {editedNote.visibility &&
-                        NoteVisibilityIconMap[editedNote.visibility]}
-                    </span>{' '}
-                    {editedNote.visibility}
-                  </div>
-                  <HiOutlineChevronDown size='1.25em' className='fill' />
-                </Listbox.Button>
-                <Listbox.Options
-                  as='div'
-                  className='w-28 absolute mt-2 py-1 bg-white rounded overflow-hidden'
-                >
-                  {Object.values(ENoteVisibility).map((visibility) => (
-                    <Listbox.Option
-                      as='button'
-                      key={visibility}
-                      value={visibility}
-                      onClick={(): void =>
-                        setEditedNote((prev) => {
-                          return {
-                            ...prev,
-                            visibility
-                          };
-                        })
-                      }
-                      className='flex flex-row group'
-                    >
-                      <div className='w-28 flex flex-row items-center p-1 group-hover:bg-primary group-hover:text-white text-start'>
-                        <span className='mr-1'>
-                          {NoteVisibilityIconMap[visibility]}
-                        </span>{' '}
-                        {visibility}
-                      </div>
-                    </Listbox.Option>
-                  ))}
-                </Listbox.Options>
-              </div>
-            </Listbox>
-          )}
-          <Popover className='relative'>
-            <Popover.Button className='group flex flex-row items-center focus:outline-none space-x-1'>
-              <AiOutlineInfoCircle className='w-5 h-5 fill-secondary group-hover:fill-darker' />
-              <p className='text-secondary group-hover:text-darker'>Details</p>
-            </Popover.Button>
-            <Popover.Panel
-              className={clsx(
-                'w-72 mt-3 p-4 bg-white rounded shadow shadow-primary/50 right-0 left-1/2 z-10 -translate-x-1/2 transform absolute'
-              )}
-            >
-              {originalNote && (
-                <>
-                  <h3 className='font-bold text-xl mb-1'>Details</h3>
-                  <p className='text-darker'>
-                    Author: {owner?.username}
-                    {isOwner && (
-                      <span className='ml-1 text-secondary'>(You)</span>
-                    )}
-                  </p>
-                  <p className='text-darker'>
-                    Category:{' '}
-                    {originalNote?.category || (
-                      <span className='text-secondary'>None</span>
-                    )}
-                  </p>
-                  <p className='text-darker'>
-                    Tags:{' '}
-                    {convertTagsListToString(originalNote?.tags) || (
-                      <span className='text-secondary'>None</span>
-                    )}
-                  </p>
-                  <p className='text-darker'>
-                    Visibility: {originalNote?.visibility}
-                  </p>
-                  <p className='text-darker'>
-                    Date Created: {formatDate(originalNote?.createdAt)}
-                  </p>
-                  <p className='text-darker'>
-                    Last Modified: {formatDate(originalNote?.lastModified)}
-                  </p>
-                </>
-              )}
-            </Popover.Panel>
-          </Popover>
-          {isOwner ? (
-            <NoteTopbarIsOwner
-              router={router}
-              dispatcher={dispatch}
-              note={originalNote as TNote}
-            />
-          ) : (
-            <NoteTopbarIsNotOwner
-              router={router}
-              dispatcher={dispatch}
-              note={originalNote as TNote}
-              authenticatedUserSelector={authenticatedUserSelector}
-            />
-          )}
-        </div>
-      </Topbar>
+      <NoteDetailTopbar
+        owner={owner}
+        isOwner={isOwner}
+        originalNote={originalNote as TNote}
+        editableNote={editableNote}
+        setEditableNote={setEditableNote}
+      />
       <div className='px-24 py-8 mt-12'>
         <h2 className='font-bold font-poppins text-4xl text-darker break-words'>
           <span
@@ -389,7 +258,7 @@ const NoteDetailPage: NextPage = () => {
             contentEditable={isOwner}
             suppressContentEditableWarning={true}
             onKeyUp={(e): void => {
-              setEditedNote((prev) => {
+              setEditableNote((prev) => {
                 return {
                   ...prev,
                   title: (e.target as HTMLHeadingElement).innerText
@@ -402,192 +271,87 @@ const NoteDetailPage: NextPage = () => {
         </h2>
         <div className='flex flex-row mt-2 space-x-4'>
           {(isOwner || originalNote?.category) && (
-            <h3 className='flex flex-row items-center font-semibold text-sm italic text-secondary'>
-              <label>Category: </label>
-              <Combobox
-                value={editedNote.category}
-                onChange={(value): void => {
-                  const spanActual = document.getElementById(
-                    noteCategoryInputId
-                  ) as HTMLSpanElement;
+            <ExpandableInput
+              label='Category'
+              cbLabel='Existing Categories'
+              cbValue={editableNote.category}
+              cbOptions={filteredCategories()}
+              displayValue={editableNote.category}
+              cbOnChange={(value): string => {
+                const casted = value as string;
 
-                  spanActual.innerText = value;
-                  setEditedNote((prev) => {
-                    return {
-                      ...prev,
-                      category: value
-                    };
-                  });
-                }}
-                disabled={!isOwner}
-              >
-                <div className='relative'>
-                  {/* https://css-tricks.com/auto-growing-inputs-textareas/ */}
-                  <div
-                    id='input-grow-horizontal-wrapper'
-                    className='min-w-[4rem] px-2 flex flex-row items-center relative'
-                  >
-                    <span
-                      id={noteCategoryInputId}
-                      aria-hidden='true'
-                      className='min-w-[4rem] px-0.5 invisible empty:before:content-[""] before:inline-block whitespace-pre-wrap'
-                    >
-                      {editedNote.category}
-                    </span>
-                    <Combobox.Input
-                      onChange={(event): void => {
-                        const spanActual = document.getElementById(
-                          noteCategoryInputId
-                        ) as HTMLSpanElement;
+                setEditableNote((prev) => {
+                  return {
+                    ...prev,
+                    category: casted
+                  };
+                });
 
-                        spanActual.innerText = event.target.value;
-                        setEditedNote((prev) => {
-                          return {
-                            ...prev,
-                            category: event.target.value
-                          };
-                        });
-                      }}
-                      className={clsx(
-                        'w-full min-w-[4rem] px-2 bg-inherit italic focus:outline-none absolute left-0',
-                        {
-                          'border-b border-secondary':
-                            editedNote.category.length === 0
-                        }
-                      )}
-                      maxLength={NOTE_CATEGORY_MAX_LENGTH}
-                    />
-                  </div>{' '}
-                  <Combobox.Options className='w-full mt-1 py-2 bg-white text-darker not-italic rounded shadow space-y-1 absolute z-10'>
-                    <p className='px-2 text-sm text-secondary'>
-                      Existing Category:
-                    </p>
-                    <hr />
-                    {filteredCategories().map((category) => (
-                      <Combobox.Option
-                        key={category}
-                        value={category}
-                        className={({ active }): string =>
-                          clsx(
-                            'px-2 hover:bg-primary hover:text-white break-words hover:cursor-pointer',
-                            {
-                              'bg-primary text-white': active
-                            }
-                          )
-                        }
-                      >
-                        {category}
-                      </Combobox.Option>
-                    ))}
-                  </Combobox.Options>
-                </div>
-              </Combobox>
-            </h3>
+                return casted;
+              }}
+              cbInputOnChange={(event): string => {
+                setEditableNote((prev) => {
+                  return {
+                    ...prev,
+                    category: event.target.value
+                  };
+                });
+
+                return event.target.value;
+              }}
+              isEmpty={editableNote.category.length === 0}
+              disabled={!isOwner}
+              maxLength={NOTE_CATEGORY_MAX_LENGTH}
+            />
           )}
 
           {(isOwner || originalNote?.tags?.length !== 0) && (
-            <h3 className='flex flex-row items-center font-semibold text-sm italic text-secondary space-x-1'>
-              <label>Tags: </label>
-              <Combobox
-                value={editedNote.tags}
-                onChange={(value): void => {
-                  const spanActual = document.getElementById(
-                    noteTagsInputId
-                  ) as HTMLSpanElement;
+            <ExpandableInput
+              label='Tags'
+              cbLabel='Existing Tags'
+              cbValue={editableNote.tags}
+              cbOptions={filteredTags()}
+              displayValue={convertTagsListToString(editableNote.tags)}
+              cbOnChange={(value): string => {
+                const casted = value as string[];
 
-                  // Because the Combobox value is tied to the input
-                  // We need to remove the second to last element
-                  // Since it is taken from the user's input
-                  // And the "value" value contains said user input
-                  if (editedNote.tags.length !== 0) {
-                    value.splice(-2, 1);
-                  }
+                // Because the Combobox value is tied to the input
+                // We need to remove the second to last element
+                // Since it is taken from the user's input
+                // And the "value" contains said user input
+                if (editableNote.tags.length !== 0) {
+                  casted.splice(-2, 1);
+                }
 
-                  spanActual.innerText = convertTagsListToString(
-                    editedNote.tags
-                  );
+                setEditableNote((prev) => {
+                  return {
+                    ...prev,
+                    tags: casted
+                  };
+                });
 
-                  setEditedNote((prev) => {
-                    return {
-                      ...prev,
-                      tags: value
-                    };
-                  });
-                }}
-                disabled={!isOwner}
-                multiple
-              >
-                <div className='relative'>
-                  {/* https://css-tricks.com/auto-growing-inputs-textareas/ */}
-                  <div
-                    id='input-grow-horizontal-wrapper'
-                    className='min-w-[4rem] px-2 flex flex-row items-center relative'
-                  >
-                    <span
-                      id={noteTagsInputId}
-                      aria-hidden='true'
-                      className='min-w-[4rem] px-0.5 invisible empty:before:content-[""] before:inline-block whitespace-pre-wrap'
-                    >
-                      {convertTagsListToString(editedNote.tags)}
-                    </span>
-                    <Combobox.Input
-                      onChange={(event): void => {
-                        const spanActual = document.getElementById(
-                          noteTagsInputId
-                        ) as HTMLSpanElement;
+                return convertTagsListToString(editableNote.tags);
+              }}
+              cbInputOnChange={(event): string => {
+                const tags = convertTagsStringToList(event.target.value);
 
-                        console.log(
-                          convertTagsStringToList(event.target.value)
-                        );
+                setEditableNote((prev) => {
+                  return {
+                    ...prev,
+                    tags
+                  };
+                });
 
-                        spanActual.innerText = event.target.value;
-                        setEditedNote((prev) => {
-                          return {
-                            ...prev,
-                            tags: convertTagsStringToList(event.target.value)
-                          };
-                        });
-                      }}
-                      value={convertTagsListToString(editedNote.tags)}
-                      className={clsx(
-                        'w-full min-w-[4rem] px-2 bg-inherit italic focus:outline-none absolute left-0',
-                        {
-                          'border-b border-secondary':
-                            editedNote.tags.length === 0 ||
-                            editedNote.tags[0] === ''
-                        }
-                      )}
-                    />
-                  </div>{' '}
-                  <Combobox.Options className='w-full mt-1 py-2 bg-white text-darker not-italic rounded shadow space-y-1 absolute z-10'>
-                    <p className='px-2 text-sm text-secondary'>Existing Tag:</p>
-                    <hr />
-                    {filteredTags().map((tag) => (
-                      <Combobox.Option
-                        key={tag}
-                        value={tag}
-                        className={({ active }): string =>
-                          clsx(
-                            'px-2 hover:bg-primary hover:text-white break-words hover:cursor-pointer',
-                            {
-                              'bg-primary text-white': active
-                            }
-                          )
-                        }
-                      >
-                        {tag}
-                      </Combobox.Option>
-                    ))}
-                  </Combobox.Options>
-                </div>
-              </Combobox>
-            </h3>
+                return convertTagsListToString(tags);
+              }}
+              isEmpty={
+                editableNote.tags.length === 0 || editableNote.tags[0] === ''
+              }
+              disabled={!isOwner}
+            />
           )}
         </div>
 
-        {/* <div className='mt-4 font-poppins text-darker whitespace-pre-wrap ProseMirror'>
-          {parse(output ?? '')}
-        </div> */}
         <Tiptap editor={editor} />
       </div>
     </MainLayout>

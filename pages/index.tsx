@@ -7,7 +7,7 @@ import WhySection from '@/components/landing/WhySection';
 import MainLayout from '@/components/layouts/MainLayout';
 import NoteList from '@/components/note/NoteList';
 import SearchField from '@/components/shared/SearchField';
-import { useInitializeState } from '@/lib/hooks';
+import { useInitializeState } from '@/lib/context/AuthContextProvider';
 
 import type { TNote } from '@/types/note';
 import type { NextPage } from 'next';
@@ -40,10 +40,7 @@ const IndexPage: NextPage = () => {
   return (
     <>
       {authUser ? (
-        <MainLayout
-          navbarCategories={personalNotesSelector.categories}
-          fillScreen={personalNotesSelector.notes.length === 0}
-        >
+        <MainLayout fillScreen={personalNotesSelector.notes.length === 0}>
           <div className='h-full px-4 py-4'>
             <div className='pb-4 border-b border-secondary'>
               <SearchField
