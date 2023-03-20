@@ -1,211 +1,36 @@
-import {
-  doc,
-  updateDoc,
-  arrayRemove,
-  arrayUnion,
-  addDoc,
-  serverTimestamp,
-  getDoc
-} from 'firebase/firestore';
-import { useRouter } from 'next/router';
-import { useEffect, useState } from 'react';
-import {
-  AiFillHeart,
-  AiOutlineHeart,
-  AiFillCopy,
-  AiOutlineLink,
-  AiOutlineTwitter
-} from 'react-icons/ai';
-import { HiShare } from 'react-icons/hi';
+import TopbarGeneric from '../shared/TopbarGeneric';
 
-import { notesCollection } from '@/lib/firebase/firestore';
-import { useAppDispatch, useAppSelector } from '@/store/hooks';
-import {
-  deleteFavorite,
-  addFavorite
-} from '@/store/slices/favoritedNotesSlice';
-import { addPersonalNote } from '@/store/slices/personalNotesSlice';
-
-import SharedButton from '../shared/SharedButton';
-
-import NoteActionModal from './NoteActionModal';
+import NoteTopbarButtonDetails from './NoteTopbarButtonDetails';
+import NoteTopbarButtonDuplicate from './NoteTopbarButtonDuplicate';
+import NoteTopbarButtonFavorite from './NoteTopbarButtonFavorite';
+import NoteTopbarButtonShare from './NoteTopbarButtonShare';
 
 import type { TNote } from '@/types/note';
-import type { WithFieldValue } from 'firebase/firestore';
+import type { TAuthenticatedUser, TUser } from '@/types/user';
 
-type NoteTopbarIsOwnerProps = {
-  note: TNote;
+type NoteTopbarIsNotOwnerProps = {
+  owner?: TUser | TAuthenticatedUser;
+  isOwner: boolean;
+  originalNote?: TNote;
 };
 
 export default function NoteTopbarIsNotOwner({
-  note
-}: NoteTopbarIsOwnerProps): JSX.Element {
-  const router = useRouter();
-  const dispatch = useAppDispatch();
-
-  const authenticatedUserSelector = useAppSelector(
-    (state) => state.authenticatedUser
-  );
-
-  const [favorited, setFavorited] = useState(false);
-  const [shareModalOpen, setShareModalOpen] = useState(false);
-  const [duplicateModalOpen, setuplicateModalOpen] = useState(false);
-
-  async function handleFavorite(): Promise<void> {
-    if (!authenticatedUserSelector || authenticatedUserSelector.uid === '') {
-      await router.push('/login');
-    }
-
-    const noteDocRef = doc(notesCollection, note?.id);
-
-    if (favorited) {
-      try {
-        await updateDoc(noteDocRef, {
-          favoritedBy: arrayRemove(authenticatedUserSelector.uid)
-        });
-
-        dispatch(deleteFavorite(note?.id));
-
-        setFavorited(false);
-      } catch (err) {
-        console.log('Error unfavoriting note', err);
-      }
-      return;
-    } else {
-      try {
-        await updateDoc(noteDocRef, {
-          favoritedBy: arrayUnion(authenticatedUserSelector.uid)
-        });
-
-        dispatch(addFavorite(note));
-
-        setFavorited(true);
-      } catch (err) {
-        console.log('Error favoriting note', err);
-      }
-    }
-  }
-
-  async function handleShare(): Promise<void> {
-    await navigator.clipboard.writeText(window.location.href);
-
-    alert("Note's link copied to clipboard");
-  }
-
-  async function handleDuplicate(): Promise<void> {
-    try {
-      const duplicateNote: WithFieldValue<Omit<TNote, 'id'>> = {
-        ...note,
-        favoritedBy: [],
-        createdAt: serverTimestamp(),
-        lastModified: serverTimestamp(),
-        owner: authenticatedUserSelector.uid
-      };
-
-      const newDocRef = await addDoc(notesCollection, duplicateNote);
-
-      const newDocSnap = await getDoc(newDocRef);
-
-      if (newDocRef.id && newDocSnap.exists()) {
-        const newDocData = newDocSnap.data() as TNote;
-
-        dispatch(addPersonalNote(newDocData));
-
-        // TODO: Fix this hacky solution
-        // This is a hacky solution to the problem of the router not
-        // updating the page after the push. The problem is that the
-        // router is not updating the page because the dispatch
-        // is not finished updating the store.
-        setTimeout(() => {
-          router.push(`/nota/${newDocRef.id}`).catch((err) => {
-            console.log('Error pushing to router', err);
-          });
-        }, 1000);
-      }
-    } catch (err) {
-      console.log('Error duplicating note', err);
-    }
-  }
-
-  useEffect(() => {
-    if (!note) return;
-
-    setFavorited(note.favoritedBy?.includes(authenticatedUserSelector.uid));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [note?.favoritedBy]);
-
+  owner,
+  isOwner,
+  originalNote
+}: NoteTopbarIsNotOwnerProps): JSX.Element {
   return (
-    <>
-      <NoteActionModal
-        title='Share this note'
-        isOpen={shareModalOpen}
-        onCloseHandler={(): void => setShareModalOpen(false)}
-      >
-        <div className='w-full flex flex-row flex-wrap justify-center space-x-2'>
-          <button
-            type='button'
-            title='Copy link to clipboard'
-            className='w-12 h-12 flex items-center justify-center bg-gray-400 rounded-full'
-            onClick={handleShare}
-          >
-            <AiOutlineLink size='1.5em' className='fill-white' />
-          </button>
-          <button
-            type='button'
-            title='Copy link to clipboard'
-            className='w-12 h-12 flex items-center justify-center bg-blue-500 rounded-full'
-            onClick={handleShare}
-          >
-            <AiOutlineTwitter size='1.5em' className='fill-white' />
-          </button>
-        </div>
-      </NoteActionModal>
-      <NoteActionModal
-        title='Duplicate this note?'
-        description='This will duplicate the everything except who favorited it.'
-        isOpen={duplicateModalOpen}
-        onCloseHandler={(): void => setuplicateModalOpen(false)}
-      >
-        <div className='flex flex-row space-x-4'>
-          <SharedButton
-            type='INVERTED'
-            text='Cancel'
-            onClickHandler={(): void => setuplicateModalOpen(false)}
-          />
-          <SharedButton
-            type='PRIMARY'
-            text='Yes, duplicate this note'
-            onClickHandler={handleDuplicate}
-          />
-        </div>
-      </NoteActionModal>
-      {favorited ? (
-        <SharedButton
-          Icon={AiFillHeart}
-          iconClassName='fill-pink-500/50 group-hover:fill-pink-500'
-          text='Unfavorite'
-          onClickHandler={handleFavorite}
+    <TopbarGeneric align='between'>
+      <p className='text-darker'>By: {owner?.username}</p>
+      <div className='flex flex-row items-center space-x-2'>
+        <NoteTopbarButtonDetails
+          originalNote={originalNote}
+          isOwner={isOwner}
         />
-      ) : (
-        <SharedButton
-          Icon={AiOutlineHeart}
-          iconClassName='fill-pink-500/50 group-hover:fill-pink-500'
-          text='Favorite'
-          onClickHandler={handleFavorite}
-        />
-      )}
-      <SharedButton
-        Icon={HiShare}
-        text='Share'
-        iconClassName='fill-green-500/75 group-hover:fill-green-500'
-        onClickHandler={(): void => setShareModalOpen(true)}
-      />
-      <SharedButton
-        Icon={AiFillCopy}
-        text='Duplicate'
-        iconClassName='fill-darker/50 group-hover:fill-darker'
-        onClickHandler={(): void => setuplicateModalOpen(true)}
-      />
-    </>
+        <NoteTopbarButtonFavorite note={originalNote} />
+        <NoteTopbarButtonShare />
+        <NoteTopbarButtonDuplicate note={originalNote} />
+      </div>
+    </TopbarGeneric>
   );
 }

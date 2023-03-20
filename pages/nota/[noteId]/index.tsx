@@ -5,7 +5,8 @@ import { useEffect, useMemo, useState } from 'react';
 
 import MainLayout from '@/components/layouts/MainLayout';
 import ExpandableInput from '@/components/note/ExpandableInput';
-import NoteDetailTopbar from '@/components/note/NoteDetailTopbar';
+import NoteTopbarIsNotOwner from '@/components/note/NoteTopbarIsNotOwner';
+import NoteTopbarIsOwner from '@/components/note/NoteTopbarIsOwner';
 import Tiptap from '@/components/tiptap/Tiptap';
 import { NOTE_CATEGORY_MAX_LENGTH, NOTE_TITLE_MAX_LENGTH } from '@/lib/config';
 import { useInitializeState } from '@/lib/context/AuthContextProvider';
@@ -52,13 +53,19 @@ const NoteDetailPage: NextPage = () => {
 
   const [owner, setOwner] = useState<TUser | TAuthenticatedUser>();
   const [originalNote, setOriginalNote] = useState<TNote>();
-
   const [editableNote, setEditableNote] = useState<TEditableNote>({
     title: '',
     category: '',
     tags: [],
     body: '',
     visibility: ENoteVisibility.PRIVATE
+  });
+  const [saveStatus, setSaveStatus] = useState<{
+    type: 'normal' | 'error';
+    message: string;
+  }>({
+    type: 'normal',
+    message: ''
   });
 
   const filteredCategories = (): string[] => {
@@ -193,6 +200,11 @@ const NoteDetailPage: NextPage = () => {
 
     console.log('Saving note');
 
+    setSaveStatus({
+      type: 'normal',
+      message: 'Saving...'
+    });
+
     const saveNoteTimeout = setTimeout(() => {
       const sanitizedTitle =
         editableNote.title.trim().slice(0, NOTE_TITLE_MAX_LENGTH) || 'Untitled';
@@ -219,6 +231,11 @@ const NoteDetailPage: NextPage = () => {
           console.log('Document successfully updated!');
           console.log('Save success');
 
+          setSaveStatus({
+            type: 'normal',
+            message: 'Save Successful'
+          });
+
           getDoc(doc(notesCollection, noteId as string))
             .then((docSnap) => {
               if (docSnap.exists()) {
@@ -233,6 +250,11 @@ const NoteDetailPage: NextPage = () => {
         })
         .catch((error) => {
           console.log('Error updating document:', error);
+
+          setSaveStatus({
+            type: 'error',
+            message: 'Failed to save note'
+          });
         });
     }, 2000);
 
@@ -242,15 +264,39 @@ const NoteDetailPage: NextPage = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [editableNote]);
 
+  useEffect(() => {
+    if (saveStatus.type === 'normal' && saveStatus.message.length > 0) {
+      const saveNoteStatusTimeout = setTimeout(() => {
+        setSaveStatus({
+          type: 'normal',
+          message: ''
+        });
+      }, 3000);
+
+      return () => {
+        clearTimeout(saveNoteStatusTimeout);
+      };
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [saveStatus]);
+
   return (
     <MainLayout navbarCategories={personalNotesSelector.categories}>
-      <NoteDetailTopbar
-        owner={owner}
-        isOwner={isOwner}
-        originalNote={originalNote as TNote}
-        editableNote={editableNote}
-        setEditableNote={setEditableNote}
-      />
+      {isOwner ? (
+        <NoteTopbarIsOwner
+          status={saveStatus}
+          isOwner={isOwner}
+          originalNote={originalNote}
+          editableNote={editableNote}
+          setEditableNote={setEditableNote}
+        />
+      ) : (
+        <NoteTopbarIsNotOwner
+          owner={owner}
+          isOwner={isOwner}
+          originalNote={originalNote}
+        />
+      )}
       <div className='px-24 py-8 mt-12'>
         <h2 className='font-bold font-poppins text-4xl text-darker break-words'>
           <span

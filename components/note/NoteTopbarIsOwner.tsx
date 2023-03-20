@@ -1,78 +1,53 @@
-import { doc, deleteDoc } from 'firebase/firestore';
-import { useRouter } from 'next/router';
-import { useState } from 'react';
-import { AiFillDelete } from 'react-icons/ai';
+import { clsx } from 'clsx';
 
-import { notesCollection } from '@/lib/firebase/firestore';
-import { useAppDispatch } from '@/store/hooks';
-import { deletePersonalNote } from '@/store/slices/personalNotesSlice';
+import TopbarGeneric from '../shared/TopbarGeneric';
 
-import SharedButton from '../shared/SharedButton';
+import NoteTopbarButtonDelete from './NoteTopbarButtonDelete';
+import NoteTopbarButtonDetails from './NoteTopbarButtonDetails';
+import NoteTopbarButtonVisibility from './NoteTopbarButtonVisibility';
 
-import NoteActionModal from './NoteActionModal';
-
-import type { TNote } from '@/types/note';
+import type { TNote, TEditableNote } from '@/types/note';
+import type { Dispatch, SetStateAction } from 'react';
 
 type NoteTopbarIsOwnerProps = {
-  note: TNote;
+  status: {
+    type: 'normal' | 'error';
+    message: string;
+  };
+  isOwner: boolean;
+  originalNote?: TNote;
+  editableNote: TEditableNote;
+  setEditableNote: Dispatch<SetStateAction<TEditableNote>>;
 };
 
 export default function NoteTopbarIsOwner({
-  note
+  status,
+  isOwner,
+  originalNote,
+  editableNote,
+  setEditableNote
 }: NoteTopbarIsOwnerProps): JSX.Element {
-  const router = useRouter();
-  const dispatch = useAppDispatch();
-
-  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
-
-  async function handleDelete(): Promise<void> {
-    const noteDocRef = doc(notesCollection, note.id);
-
-    try {
-      await deleteDoc(noteDocRef);
-
-      dispatch(deletePersonalNote(note.id));
-
-      await router.push('/');
-    } catch (err) {
-      console.log('Error deleting note', err);
-    }
-  }
-
   return (
-    <>
-      <NoteActionModal
-        title='Are you sure?'
-        description='This is the final step to delete your note. This action is irreversible.'
-        isOpen={deleteModalOpen}
-        onCloseHandler={(): void => setDeleteModalOpen(false)}
+    <TopbarGeneric align='between'>
+      <p
+        className={clsx('text-darker', {
+          'text-red-500': status.type === 'error',
+          'text-darker': status.type === 'normal'
+        })}
       >
-        <div className='flex flex-row space-x-4'>
-          <SharedButton
-            type='INVERTED'
-            text='Cancel'
-            onClickHandler={(): void => setDeleteModalOpen(false)}
-          />
-          <SharedButton
-            type='PRIMARY'
-            text='Yes, delete this note'
-            onClickHandler={handleDelete}
-          />
-        </div>
-      </NoteActionModal>
-
-      {/* <SharedButton
-        Icon={AiFillEdit}
-        iconClassName='fill-darker/50 group-hover:fill-darker'
-        text='Edit'
-        href={`/nota/${note.id}/edit`}
-      /> */}
-      <SharedButton
-        Icon={AiFillDelete}
-        iconClassName='fill-red-600/50 group-hover:fill-red-600'
-        text='Delete'
-        onClickHandler={(): void => setDeleteModalOpen(true)}
-      />
-    </>
+        {status.message}
+      </p>
+      <div className='flex flex-row items-center space-x-2'>
+        <NoteTopbarButtonVisibility
+          editableNote={editableNote}
+          setEditableNote={setEditableNote}
+        />
+        <NoteTopbarButtonDetails
+          originalNote={originalNote}
+          isOwner={isOwner}
+        />
+        <NoteTopbarButtonDelete noteId={originalNote?.id ?? ''} />
+      </div>
+    </TopbarGeneric>
   );
 }
