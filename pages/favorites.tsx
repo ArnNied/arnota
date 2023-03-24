@@ -36,8 +36,10 @@ const FavoritesPage: NextPage = () => {
         where('visibility', '!=', ENoteVisibility.PRIVATE),
         where('favoritedBy', 'array-contains', authUser?.uid)
       );
-      getDocs(q)
-        .then((querySnapshot) => {
+
+      void (async (): Promise<void> => {
+        try {
+          const querySnapshot = await getDocs(q);
           const notes: TNote[] = [];
           querySnapshot.forEach((noteDoc) => {
             const noteDocData = simplifyNoteData(noteDoc.data());
@@ -47,10 +49,10 @@ const FavoritesPage: NextPage = () => {
 
           setFilteredNotes(notes);
           dispatch(setFavorites(notes));
-        })
-        .catch((error) => {
-          console.log('Error getting documents: ', error);
-        });
+        } catch (err) {
+          console.log('Error getting documents: ', err);
+        }
+      })();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [authUser, favoritedNotesSelector.hasBeenFetched]);

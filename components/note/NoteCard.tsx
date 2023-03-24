@@ -34,17 +34,21 @@ export default function NoteCard({ note }: NoteCardProps): JSX.Element {
     if (note.owner === authenticatedUserSelector.uid) {
       setOwnerUsername(`${authenticatedUserSelector.username} (You)`);
     } else {
-      const userDocRef = doc(usersCollection, note.owner);
+      void (async (): Promise<void> => {
+        try {
+          const userDocRef = doc(usersCollection, note.owner);
 
-      getDoc(userDocRef)
-        .then((userDocSnap) => {
+          const userDocSnap = await getDoc(userDocRef);
+
           if (userDocSnap.exists()) {
             setOwnerUsername(userDocSnap.data().username);
+          } else {
+            throw new Error('User document does not exist');
           }
-        })
-        .catch((error) => {
+        } catch (error) {
           console.log('Error getting document:', error);
-        });
+        }
+      })();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [authenticatedUserSelector]);

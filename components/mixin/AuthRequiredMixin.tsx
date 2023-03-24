@@ -20,10 +20,15 @@ export default function AuthRequiredMixin({
     console.log('2');
 
     if (authUser === null) {
-      router
-        .push('/login')
-        .then(() => console.log('User not logged in'))
-        .catch((err) => console.log('Error redirecting', err));
+      void (async (): Promise<void> => {
+        try {
+          console.log('User not logged in');
+
+          await router.push('/login');
+        } catch (err) {
+          console.log('Error redirecting', err);
+        }
+      })();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [authUserLoading, authUser, router.isReady]);

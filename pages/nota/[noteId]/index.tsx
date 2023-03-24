@@ -137,14 +137,17 @@ const NoteDetailPage: NextPage = () => {
         visibility: isAnOwnedNote.visibility
       });
       editor?.commands.setContent(JSON.parse(isAnOwnedNote.body) as Content);
-      editor?.setEditable(true);
+      console.log('owned');
     } else {
-      const noteDocRef = doc(notesCollection, noteId as string);
+      console.log('not owned');
+      void (async (): Promise<void> => {
+        try {
+          const noteDocRef = doc(notesCollection, noteId as string);
 
-      getDoc(noteDocRef)
-        .then((noteDoc) => {
-          if (noteDoc.exists()) {
-            const noteDocData = simplifyNoteData(noteDoc.data());
+          const noteDocSnap = await getDoc(noteDocRef);
+
+          if (noteDocSnap.exists()) {
+            const noteDocData = simplifyNoteData(noteDocSnap.data());
 
             setOriginalNote(noteDocData);
             setEditableNote({
@@ -158,26 +161,23 @@ const NoteDetailPage: NextPage = () => {
             editor?.commands.setContent(
               JSON.parse(noteDocData.body) as Content
             );
-            editor?.setEditable(authUser?.uid === noteDocData.owner);
 
             // Get the owner of the note if it is not owned by the authenticated user
             const userDocRef = doc(usersCollection, noteDocData.owner);
-            getDoc(userDocRef)
-              .then((userDoc) => {
-                if (userDoc.exists()) {
-                  setOwner(userDoc.data());
-                }
-              })
-              .catch((error) => {
-                console.log("Error getting owner's document:", error);
-              });
+            const userDocSnap = await getDoc(userDocRef);
+
+            if (userDocSnap.exists()) {
+              setOwner(userDocSnap.data());
+            } else {
+              throw new Error('User document does not exist');
+            }
           } else {
-            console.log('No such document!');
+            throw new Error('Note document does not exist');
           }
-        })
-        .catch((error) => {
-          console.log('Error getting document:', error);
-        });
+        } catch (error) {
+          console.log('Error getting document', error);
+        }
+      })();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
@@ -218,16 +218,20 @@ const NoteDetailPage: NextPage = () => {
           (tag, index, self) => self.indexOf(tag) === index && tag.length > 0
         );
 
-      updateDoc(doc(notesCollection, noteId as string), {
-        title: sanitizedTitle,
-        category: sanitizedCategory,
-        tags: sanitizedTags,
-        body: editableNote.body,
-        plainBody: editor?.getText(),
-        visibility: editableNote.visibility,
-        lastModified: serverTimestamp()
-      })
-        .then(() => {
+      void (async (): Promise<void> => {
+        try {
+          const noteDocRef = doc(notesCollection, noteId as string);
+
+          await updateDoc(noteDocRef, {
+            title: sanitizedTitle,
+            category: sanitizedCategory,
+            tags: sanitizedTags,
+            body: editableNote.body,
+            plainBody: editor?.getText(),
+            visibility: editableNote.visibility,
+            lastModified: serverTimestamp()
+          });
+
           console.log('Document successfully updated!');
           console.log('Save success');
 
@@ -236,26 +240,30 @@ const NoteDetailPage: NextPage = () => {
             message: 'Save Successful'
           });
 
-          getDoc(doc(notesCollection, noteId as string))
-            .then((docSnap) => {
-              if (docSnap.exists()) {
-                const docData = simplifyNoteData(docSnap.data());
-                setOriginalNote(docData);
-                dispatch(updatePersonalNote(docData));
-              }
-            })
-            .catch((err) => {
-              console.log('Error getting document:', err);
-            });
-        })
-        .catch((error) => {
-          console.log('Error updating document:', error);
+          try {
+            const updatedNoteDocSnap = await getDoc(noteDocRef);
+
+            if (updatedNoteDocSnap.exists()) {
+              const updatedNoteDocData = simplifyNoteData(
+                updatedNoteDocSnap.data()
+              );
+              setOriginalNote(updatedNoteDocData);
+              dispatch(updatePersonalNote(updatedNoteDocData));
+            } else {
+              throw new Error('Note document does not exist');
+            }
+          } catch (error) {
+            console.log('Error getting updated document', error);
+          }
+        } catch (error) {
+          console.log('Error updating document', error);
 
           setSaveStatus({
             type: 'error',
             message: 'Failed to save note'
           });
-        });
+        }
+      })();
     }, 2000);
 
     return () => {
@@ -264,6 +272,7 @@ const NoteDetailPage: NextPage = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [editableNote]);
 
+  // Clear the save status message after 3 seconds
   useEffect(() => {
     if (saveStatus.type === 'normal' && saveStatus.message.length > 0) {
       const saveNoteStatusTimeout = setTimeout(() => {
@@ -279,6 +288,11 @@ const NoteDetailPage: NextPage = () => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [saveStatus]);
+
+  useEffect(() => {
+    if (!editor) return;
+    editor?.setEditable(isOwner);
+  }, [editor, isOwner]);
 
   return (
     <MainLayout navbarCategories={personalNotesSelector.categories}>

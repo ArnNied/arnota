@@ -17,10 +17,15 @@ export default function AuthForbiddenMixin({
     if (authUserLoading || !router.isReady) return;
 
     if (authUser) {
-      router
-        .push('/')
-        .then(() => console.log('User already logged in'))
-        .catch((err) => console.log('Error redirecting', err));
+      void (async (): Promise<void> => {
+        try {
+          console.log('User already logged in');
+
+          await router.push('/');
+        } catch (err) {
+          console.log('Error redirecting', err);
+        }
+      })();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [authUserLoading, authUser, router.isReady]);

@@ -5,6 +5,7 @@ import { AiFillCopy } from 'react-icons/ai';
 
 import { useInitializeState } from '@/lib/context/AuthContextProvider';
 import { notesCollection } from '@/lib/firebase/firestore';
+import { simplifyNoteData } from '@/lib/utils';
 import { useAppDispatch } from '@/store/hooks';
 import { addPersonalNote } from '@/store/slices/personalNotesSlice';
 
@@ -39,8 +40,11 @@ export default function NoteTopbarButtonDuplicate({
     }
 
     try {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { id, ...noteWithoutId } = note;
+
       const duplicateNote: WithFieldValue<Omit<TNote, 'id'>> = {
-        ...note,
+        ...noteWithoutId,
         favoritedBy: [],
         createdAt: serverTimestamp(),
         lastModified: serverTimestamp(),
@@ -52,7 +56,7 @@ export default function NoteTopbarButtonDuplicate({
       const newDocSnap = await getDoc(newDocRef);
 
       if (newDocRef.id && newDocSnap.exists()) {
-        const newDocData = newDocSnap.data() as TNote;
+        const newDocData = simplifyNoteData(newDocSnap.data() as TNote);
 
         dispatch(addPersonalNote(newDocData));
 
